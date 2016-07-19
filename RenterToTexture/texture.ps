@@ -1,0 +1,57 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: texture.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+float2 computeUV(PixelInputType input){
+	float2 uv = input.tex;
+	float2 center = float2(0.5f,0.5f);
+	float ratio = 3.0f;
+	float r = 0.8f;
+
+	uv -= center;
+
+	float dist = sqrt(dot(uv,uv));
+	uv = uv * dist / r;
+	uv *= ratio;
+	uv += center;
+	//uv = saturate(uv);
+	return uv;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 TexturePixelShader(PixelInputType input) : SV_TARGET
+{
+	float2 newUV = input.tex;
+	float4 color = float4(1.0f,0.0f,0.0f,1.0f);
+
+	newUV = computeUV(input);
+	
+	if ( (newUV.x < 1.0f && newUV.x >= 0.0f))// || (newUV.y < 1.0f && newUV.y >= 0.0f))
+	{
+		if (newUV.y < 1.0f && newUV.y >= 0.0f)
+		{
+			color = shaderTexture.Sample(SampleType, newUV);
+		}
+	}
+
+	return  color;
+}
