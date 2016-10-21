@@ -3,7 +3,6 @@
 #include "windowManager.h"
 #include "NodeWindow.h"
 
-
 bool NodeWindow::m_isInitialized = false;
 HWND NodeWindow::m_ParentHwnd = nullptr;
 HINSTANCE NodeWindow::m_hinst = nullptr;
@@ -41,12 +40,13 @@ LRESULT CALLBACK NodeWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 			float delta = 0.0f;
 			static float rot = 0.01f;
 
-			//cout << "prevH: " << prevH << "\t curH:" << curH << endl;
 			if (prevH == curH)
+			{
+				cout << "Clicked on same child window" << endl;
 				return 0;
+			}
 
 			WindowManager* wM = WindowManager::getWindowManager();
-			
 			NodeWindow *prevNW = wM->findNodeWindow(prevH);
 			NodeWindow *curNW = wM->findNodeWindow(curH);
 
@@ -57,7 +57,6 @@ LRESULT CALLBACK NodeWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 			delta += rot;
 			rot += 0.01f;
 			op->setRotation(rot);
-			//prevNW->setOps(nullptr); //temp
 			curNW->setOps(op);
 
 			return 0;
@@ -68,7 +67,6 @@ LRESULT CALLBACK NodeWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 
 NodeWindow::NodeWindow()
 {
-	m_Ops = nullptr;
 	Initialize();
 }
 
@@ -79,15 +77,12 @@ NodeWindow::~NodeWindow()
 
 int NodeWindow::Initialize()
 {
+	m_Ops = nullptr;
+
 	if (!m_isInitialized)
 	{
-		//cout << "creating nodewindow class" << endl;
-		//m_ClassName = "nodeClass";
-		//m_Title = "nodeWindow";
 		m_Style = CS_HREDRAW | CS_VREDRAW;
 		m_hinst = GetModuleHandle(NULL);
-		//WindowManager* windowManager = WindowManager::getWindowManager();
-		//m_ParentHwnd = windowManager->getRootWindowHandle();
 		WNDCLASSEX wcex;
 
 		wcex.cbSize = sizeof(WNDCLASSEX);
@@ -104,26 +99,43 @@ int NodeWindow::Initialize()
 		wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_WINLOGO);
 		if (!RegisterClassEx(&wcex))
 			return E_FAIL;
-
 		
 		m_isInitialized = true;
 	}
-
 	return true;
 }
 
 void NodeWindow::DeInitialize()
 {
+	if (m_Ops)
+	{
+		delete m_Ops;
+		m_Ops = nullptr;
+	}
+
+	if (m_Input)
+	{
+		delete m_Input;
+		m_Input = nullptr;
+	}
+
+	if (m_Graphics)
+	{
+		delete m_Graphics;
+		m_Graphics = nullptr;
+	}
+
+	// Remove the window.
+	DestroyWindow(m_hwnd);
+	m_hwnd = NULL;
 }
 
-int NodeWindow::createWindow(HWND parentHwnd)
+int NodeWindow::createWindow(const HWND& parentHwnd)
 {
-//	int i = 0; 
 	static int i = 0;
-	/*LPTSTR*/ string title = string(m_Title);
+	string title = string(m_Title);
 	
 	string s = "-" + to_string(i);
-
 	title += s;
 
 	// Create the node window. 
@@ -136,7 +148,7 @@ int NodeWindow::createWindow(HWND parentHwnd)
 		| WS_THICKFRAME
 		| WS_CLIPSIBLINGS
 		| WS_OVERLAPPEDWINDOW,
-		300, 200, 250, 200, //100 + i * 10,
+		100 + i * 50, 100 + i * 50, 250, 200,
 		parentHwnd,           // parent window handle
 		NULL, //(HMENU)(int)(ID_FIRSTCHILD + 1),	// class menu used              
 		GetModuleHandle(NULL), //m_hinst,				// instance handle              
@@ -150,7 +162,6 @@ int NodeWindow::createWindow(HWND parentHwnd)
 		NodeWindow::m_ParentHwnd = parentHwnd;
 	if (!NodeWindow::m_hinst)
 		NodeWindow::m_hinst = GetModuleHandle(NULL);
-
 	++i;
 
 	return TRUE;
@@ -164,10 +175,6 @@ bool NodeWindow::createInputObject()
 		return false;
 	}
 
-	//RECT rc;
-	//GetWindowRect(m_hwnd, &rc);
-	//int w = rc.right - rc.left;
-	//int h = rc.bottom - rc.top;
 	// Initialize the input object.
 	m_Input->Initialize();
 }
@@ -175,10 +182,6 @@ bool NodeWindow::createInputObject()
 bool NodeWindow::createGraphicsObject()
 {
 	bool result;
-	//RECT rc;
-	//GetWindowRect(m_hwnd, &rc);
-	//int w = rc.right - rc.left;
-	//int h = rc.bottom - rc.top;
 
 	m_Graphics = new GraphicsClass;
 	if (!m_Graphics)
@@ -199,9 +202,7 @@ bool NodeWindow::createGraphicsObject()
 bool NodeWindow::Frame()
 {
 	bool result;
-	int mouseX, mouseY;
 
-	//cout << "OPS: " << this->m_Ops << endl;
 	result = m_Graphics->Render(this->m_Ops);
 	if(!result)
 	{
@@ -211,9 +212,10 @@ bool NodeWindow::Frame()
 	return true;
 }
 
-void
-NodeWindow::displayWindow()
+bool NodeWindow::displayWindow()
 {
 	ShowWindow(m_hwnd, SW_SHOWDEFAULT);
 	UpdateWindow(m_hwnd);
+	
+	return true;
 }

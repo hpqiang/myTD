@@ -29,48 +29,50 @@ public:
 	NodeWindow();
 	~NodeWindow();
 
-	HWND getNodeWindowHandle()
+	HWND getNodeWindowHandle() const
 	{
 		return m_hwnd;
 	}
-	void setNodeWindowHandle(HWND h)
-	{
-		m_hwnd = h;
-	}
+	//void setNodeWindowHandle(HWND h)
+	//{
+	//	m_hwnd = h;
+	//}
 
-	Ops *getOps()
-	{
-		return m_Ops;
-	}
-	void setOps(Ops *op)
+	////Ops *getOps() const
+	//bool getOps(Ops **op)
+	//{
+	//	*op = m_Ops;
+	//	//return m_Ops;
+	//}
+	void setOps(Ops *const op)
 	{
 		m_Ops = op;
 	}
 
-	HWND getConnectedFrom()
-	{
-		return m_ConnectedFrom;
-	}
-	void setConnectedFrom(HWND h)
+	//HWND getConnectedFrom() const
+	//{
+	//	return m_ConnectedFrom;
+	//}
+	void setConnectedFrom(const HWND& h)
 	{
 		m_ConnectedFrom = h;
 	}
 
-	HWND getConnectedTo()
+	HWND getConnectedTo() const
 	{
 		return m_ConnectedTo;
 	}
-	void setConnectedTo(HWND h)
+	void setConnectedTo(const HWND& h)
 	{
-		if (h == nullptr)
+		if (h == nullptr)  //HPQ: ????
 			return;
 		m_ConnectedTo = h;
 	}
 
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-	int createWindow(HWND);
-	void displayWindow();
+	int createWindow(const HWND&);
+	bool displayWindow();
 
 	bool createInputObject();
 	bool createGraphicsObject();

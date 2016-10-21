@@ -170,9 +170,11 @@ void RootWindow::DeInitialize()
 	{
 		for(auto nW:m_NodeWindows)
 		{
+			DestroyWindow(nW->getNodeWindowHandle());
 			delete nW;
 			nW = nullptr;
 		}
+		//HPQ: Destroy the registered class for node windows? 
 		m_NodeWindows.clear();
 	}
 
@@ -228,7 +230,6 @@ bool RootWindow::createGraphicsObject()
 	return true;
 }
 
-
 bool RootWindow::Frame()
 {
 	bool result;
@@ -248,7 +249,6 @@ bool RootWindow::Frame()
 		}
 
 	}
-
 	return true;
 }
 
@@ -270,7 +270,6 @@ void RootWindow::run()
 	done = false;
 	while (!done)
 	{
-		//while (GetMessage(&msg, NULL, 0, 0))
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -291,6 +290,5 @@ void RootWindow::run()
 				done = true;
 			}
 		}
-
 	}
 }
