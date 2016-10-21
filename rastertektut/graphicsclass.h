@@ -9,6 +9,8 @@
 // INCLUDES //
 //////////////
 //#include <windows.h>
+//#include "nodeWindow.h"  //Don't include this
+
 #include "d3dclass.h"
 #include "cameraclass.h"
 #include "modelclass.h"
@@ -26,6 +28,8 @@ const float SCREEN_NEAR = 0.1f;
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: GraphicsClass
 ////////////////////////////////////////////////////////////////////////////////
+class Ops; //forward declaration
+
 class GraphicsClass
 {
 public:
@@ -37,8 +41,7 @@ public:
 	void Shutdown();
 	bool Frame(int,int);
 
-//private:
-	bool Render();
+	bool Render(Ops* op);
 
 private:
 	D3DClass* m_D3D;

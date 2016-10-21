@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: graphicsclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
+#include "nodeWindow.h"
+
 #include "graphicsclass.h"
 
 #include <iostream>
@@ -46,7 +48,8 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	result = m_D3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	//result = m_D3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_D3D->createD3DEnv(/*screenWidth, screenHeight, */VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result) {
 		return false;
 	}
@@ -161,7 +164,7 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	//return true;
 
 	// Render the graphics scene.
-	result = Render();
+	result = Render(nullptr);
 	if (!result)
 	{
 		return false;
@@ -170,21 +173,24 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	return true;
 }
 
-bool GraphicsClass::Render()
+bool GraphicsClass::Render(Ops* op)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
 	bool result;
 
 	static float i = 1.0f;
-	static float rotation = 0.0f;
+	/*static*/ float rotation = 0.0f;
+	static float noOpRotation = 0.0f;
+	/*static*/ float opRotation = 0.0f;
+	static float prevOpRotation = 0.0f;
+	//static float prevRotation = 0.0f;
 	// Clear the buffers to begin the scene.
-	m_D3D->BeginScene(0.0f, 0.0f, i, 1.0f);
-	//i -= 0.1f;
-	if (i <= 0.0f)
-	{
-		i = 1.0f;
-	}
-	//cout << "BeginScene i = " << i << endl;
+	m_D3D->BeginScene(0.0f, 0.0f, i, 0.5f);
+
+	//if (i <= 0.0f)
+	//{
+	//	i = 1.0f;
+	//}
 
 	// Generate the view matrix based on the camera's position.
 	m_Camera->Render();
@@ -194,28 +200,35 @@ bool GraphicsClass::Render()
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 	m_D3D->GetWorldMatrix(worldMatrix);
 
-	//rotation += 0.0005f ;
-	//if (rotation > (360.0f/(float)D3DX_PI) )
-	//{
-	//	rotation -= 360.0f / ( (float)D3DX_PI);
-	//}
+	if (op != nullptr)
+	{
+		opRotation += op->getRotation();
+		//prevRotation += opRotation;
+	/*else
+		rotation += 0.0005f;*/
 
-	//D3DXMatrixRotationY(&worldMatrix, rotation);
+	rotation += opRotation;
+	//rotation += prevOpRotation;
+	//cout << "op: " << op << '\t';
+	//cout << "opRotation--->" << opRotation << endl;
+	//cout << "rotation--->" << rotation << endl;
 
+	D3DXMatrixRotationY(&worldMatrix, rotation);
+	prevOpRotation += rotation;
+	//D3DXMatrixRotationY(&worldMatrix, opRotation);
+	}
+	else
+	{
+		rotation += 0.0005f; 
+		noOpRotation += rotation;
+			D3DXMatrixRotationY(&worldMatrix, noOpRotation);
+	}
+	if (rotation > (360.0f / (float)D3DX_PI))
+	{
+		rotation -= 360.0f / ((float)D3DX_PI);
+	}
 
-	//cout << "viewMatrix: " << endl;
-	//printMatrix(viewMatrix);
-	//cout << "projectionMatrix: " << endl;
-	//printMatrix(projectionMatrix);
-	//cout << "worldMatrix: " << endl;
-	//printMatrix(worldMatrix);
-
-	//getchar();
-	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	//m_Model->Render(m_D3D->GetDevice());
 	m_Model->Render(m_D3D->GetDeviceContext());
-
-
 
 	// Render the model using the texture shader.
 	result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,

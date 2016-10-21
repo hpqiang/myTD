@@ -16,12 +16,12 @@
 //////////////
 #include <windows.h>
 
-
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
-#include "inputclass.h"
-#include "graphicsclass.h"
+//#include "inputclass.h"
+//#include "graphicsclass.h"
+#include "windowManager.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,19 +42,20 @@ public:
 
 private:
 	bool Frame();
-	void InitializeWindows(int&, int&);
+	//void InitializeWindows(int&, int&);
 
 	LRESULT InitWindow(int&, int&);
 
 	void ShutdownWindows();
 
 private:
-	/*LPCWSTR*/ LPCSTR m_applicationName;
+	LPCSTR m_applicationName;
 	HINSTANCE m_hinstance;
 	HWND m_hwnd;
 
 	InputClass* m_Input;
 	GraphicsClass* m_Graphics;
+	WindowManager * m_WindowManager;
 };
 
 
@@ -68,6 +69,5 @@ static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 // GLOBALS //
 /////////////
 static SystemClass* ApplicationHandle = 0;
-
 
 #endif

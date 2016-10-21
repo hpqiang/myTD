@@ -11,35 +11,39 @@ using namespace std;
 //int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 int main()
 {
-	cout << "Start ... \n";
+	RootWindow* rootWindow = new RootWindow();
 
-	SystemClass* System;
-	bool result;
-	
-	
-	// Create the system object.
-	System = new SystemClass;
-	if(!System)
-	{
-		return 0;
-	}
+	rootWindow->displayWindow();
+	rootWindow->run();
 
-	// Initialize and run the system object.
-	result = System->Initialize();
 
-	if(result)
-	{
-		System->Run();
-	}
+	//bool result;
+	//SystemClass* System;
+	//
+	//
+	//// Create the system object.
+	//System = new SystemClass;
+	//if(!System)
+	//{
+	//	return 0;
+	//}
 
-	// Shutdown and release the system object.
-	System->Shutdown();
-	delete System;
-	System = 0;
+	//// Initialize and run the system object.
+	//result = System->Initialize();
 
-	cout << "End...\n";
+	//if(result)
+	//{
+	//	System->Run();
+	//}
 
-	getchar();
+	//// Shutdown and release the system object.
+	//System->Shutdown();
+	//delete System;
+	//System = 0;
+
+	//cout << "End...\n";
+
+	//getchar();
 
 	return 0;
 }

@@ -46,6 +46,7 @@ SystemClass::SystemClass()
 {
 	m_Input = 0;
 	m_Graphics = 0;
+
 }
 
 
@@ -70,9 +71,8 @@ bool SystemClass::Initialize()
 	screenHeight = 0;
 
 	// Initialize the windows api.
-	// InitializeWindows(screenWidth, screenHeight);
 	if (FAILED(InitWindow(screenWidth, screenHeight)))
-	return 0;
+		return 0;
 
 	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
 	m_Input = new InputClass;
@@ -82,7 +82,7 @@ bool SystemClass::Initialize()
 	}
 
 	// Initialize the input object.
-	m_Input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	m_Input->Initialize();
 
 	// Create the graphics object.  This object will handle rendering all the graphics for this application.
 	m_Graphics = new GraphicsClass;
@@ -97,14 +97,14 @@ bool SystemClass::Initialize()
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
 
 void SystemClass::Shutdown()
 {
-	// Release the graphics object.
+	 //Release the graphics object.
 	if(m_Graphics)
 	{
 		m_Graphics->Shutdown();
@@ -115,10 +115,10 @@ void SystemClass::Shutdown()
 	// Release the input object.
 	if(m_Input)
 	{
-		m_Input->Shutdown();
 		delete m_Input;
 		m_Input = 0;
 	}
+
 
 	// Shutdown the window.
 	ShutdownWindows();
@@ -131,7 +131,6 @@ void SystemClass::Run()
 {
 	MSG msg;
 	bool done, result;
-
 
 	// Initialize the message structure.
 	ZeroMemory(&msg, sizeof(MSG));
@@ -161,48 +160,24 @@ void SystemClass::Run()
 				done = true;
 			}
 		}
-		// Check if the user pressed escape and wants to quit.
-		if (m_Input->IsEscapePressed() == true)
-		{
-			done = true;
-		}
 	}
 
 	return;
 }
-
 
 bool SystemClass::Frame()
 {
 	bool result;
 	int mouseX, mouseY;
 
-	//// Check if the user pressed escape and wants to exit the application.
-	//if(m_Input->IsKeyDown(VK_ESCAPE))
-	//{
-	//	return false;
-	//}
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input->IsKeyDown(VK_ESCAPE))
+	{
+		return false;
+	}
 	
-	// Do the input frame processing.
-	result = m_Input->Frame();
-	if (!result)
-	{
-		return false;
-	}
-
-	// Get the location of the mouse from the input object,
-	m_Input->GetMouseLocation(mouseX, mouseY);
-
 	// Do the frame processing for the graphics object.
-	result = m_Graphics->Frame(mouseX, mouseY);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Do the frame processing for the graphics object.
-	//result = m_Graphics->Frame();
-	result = m_Graphics->Render();
+	result = m_Graphics->Render(nullptr);
 	if(!result)
 	{
 		return false;
@@ -210,7 +185,6 @@ bool SystemClass::Frame()
 
 	return true;
 }
-
 
 LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
@@ -240,102 +214,10 @@ LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam
 	//}
 }
 
-//void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
-//{
-//	WNDCLASSEX wc;
-//	DEVMODE dmScreenSettings;
-//	int posX, posY;
-//
-//
-//	// Get an external pointer to this object.	
-//	ApplicationHandle = this;
-//
-//	// Get the instance of this application.
-//	m_hinstance = GetModuleHandle(NULL);
-//
-//	// Give the application a name.
-//	m_applicationName = /*L*/"Engine";
-//
-//	// Setup the windows class with default settings.
-//	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-//	wc.lpfnWndProc   = WndProc;
-//	wc.cbClsExtra    = 0;
-//	wc.cbWndExtra    = 0;
-//	wc.hInstance     = m_hinstance;
-//	wc.hIcon		 = LoadIcon(NULL, IDI_WINLOGO);
-//	wc.hIconSm       = wc.hIcon;
-//	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-//	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-//	wc.lpszMenuName  = NULL;
-//	wc.lpszClassName = m_applicationName;
-//	wc.cbSize        = sizeof(WNDCLASSEX);
-//	
-//
-//	// Register the window class.
-//	if (!RegisterClassEx(&wc)) {
-//		//cout << "Wrong" << endl;
-//		return;
-//	}
-//
-//	// Determine the resolution of the clients desktop screen.
-//	screenWidth  = GetSystemMetrics(SM_CXSCREEN);
-//	screenHeight = GetSystemMetrics(SM_CYSCREEN);
-//
-//	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
-//	if(FULL_SCREEN)
-//	{
-//		// If full screen set the screen to maximum size of the users desktop and 32bit.
-//		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-//		dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
-//		dmScreenSettings.dmPelsWidth  = (unsigned long)screenWidth;
-//		dmScreenSettings.dmPelsHeight = (unsigned long)screenHeight;
-//		dmScreenSettings.dmBitsPerPel = 32;			
-//		dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-//
-//		// Change the display settings to full screen.
-//		ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
-//
-//		// Set the position of the window to the top left corner.
-//		posX = posY = 0;
-//	}
-//	else
-//	{
-//		// If windowed then set it to 800x600 resolution.
-//		screenWidth  = 800;
-//		screenHeight = 600;
-//
-//		// Place the window in the middle of the screen.
-//		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth)  / 2;
-//		posY = (GetSystemMetrics(SM_CYSCREEN) - screenHeight) / 2;
-//	}
-//
-//	// Create the window with the screen settings and get the handle to it.
-//	m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName, 
-//						    WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
-//						    posX, posY, screenWidth, screenHeight, NULL, NULL, m_hinstance, NULL);
-//
-//	// Bring the window up on the screen and set it as main focus.
-//	ShowWindow(m_hwnd, SW_SHOW);
-//	SetForegroundWindow(m_hwnd);
-//	SetFocus(m_hwnd);
-//
-//	//// Hide the mouse cursor.
-//	ShowCursor(false);
-//
-//	return;
-//}
-
-
 void SystemClass::ShutdownWindows()
 {
 	// Show the mouse cursor.
 	ShowCursor(true);
-
-	// Fix the display settings if leaving full screen mode.
-	if(FULL_SCREEN)
-	{
-		ChangeDisplaySettings(NULL, 0);
-	}
 
 	// Remove the window.
 	DestroyWindow(m_hwnd);
@@ -350,7 +232,6 @@ void SystemClass::ShutdownWindows()
 
 	return;
 }
-
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {

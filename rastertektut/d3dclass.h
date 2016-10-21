@@ -13,6 +13,10 @@
 #pragma comment(lib, "d3dx11.lib")
 #pragma comment(lib, "d3dx10.lib")
 
+/**********/
+#pragma comment(lib, "DXGUID.lib")
+/**********/
+
 //////////////
 // INCLUDES //
 //////////////
@@ -31,7 +35,8 @@ public:
 	D3DClass(const D3DClass&);
 	~D3DClass();
 
-	bool Initialize(int, int, bool, HWND, bool, float, float);
+	//bool Initialize(int, int, bool, HWND, bool, float, float);
+	bool createD3DEnv(/*int, int,*/ bool, HWND, bool, float, float);
 	void Shutdown();
 
 	void BeginScene(float, float, float, float);
@@ -39,6 +44,8 @@ public:
 
 	ID3D11Device* GetDevice();
 	ID3D11DeviceContext* GetDeviceContext();
+	//static ID3D11Device* GetDevice();
+	//static ID3D11DeviceContext* GetDeviceContext();
 
 	void GetProjectionMatrix(D3DXMATRIX&);
 	void GetWorldMatrix(D3DXMATRIX&);
@@ -46,11 +53,24 @@ public:
 
 	void GetVideoCardInfo(char*, int&);
 
+protected:
+	bool createDeviceAndDeviceContext();
+	bool createSwapChain(HWND hwnd, bool fullscreen);
+	bool createRenderTargetView();
+	bool createDepthBuffer(HWND hwnd);
+	bool createDepthStencilState();
+	bool createDepthStencilView();
+	bool createRasterState();
+	bool createViewPort(HWND hwnd);
+	bool initializeMatrix(HWND hwnd, float, float);
+
 private:
 	bool m_vsync_enabled;
 	int m_videoCardMemory;
 	char m_videoCardDescription[128];
 	IDXGISwapChain* m_swapChain;
+	//static ID3D11Device* m_device;
+	//static ID3D11DeviceContext* m_deviceContext;
 	ID3D11Device* m_device;
 	ID3D11DeviceContext* m_deviceContext;
 	ID3D11RenderTargetView* m_renderTargetView;
