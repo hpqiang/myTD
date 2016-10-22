@@ -23,7 +23,7 @@ private:
 	float m_Rotation;
 };
 
-class NodeWindow
+class __declspec(dllexport) NodeWindow
 {
 public:
 	NodeWindow();
@@ -58,15 +58,16 @@ public:
 		m_ConnectedFrom = h;
 	}
 
-	//HWND getConnectedTo() const
-	//{
-	//	return m_ConnectedTo;
-	//}
-	bool getConnectedTo(HWND *h) 
+	HWND getConnectedTo() const
 	{
-		*h = m_ConnectedTo;
-		return true;
+		return m_ConnectedTo;
 	}
+	//HPQ: Below function?
+	//bool getConnectedTo(HWND *h) 
+	//{
+	//	*h = m_ConnectedTo;
+	//	return true;
+	//}
 	void setConnectedTo(const HWND& h)
 	{
 		if (h == nullptr)  //HPQ: ????

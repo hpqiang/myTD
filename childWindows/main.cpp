@@ -197,7 +197,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lpa
 		// Create three invisible child windows. 
 		for (i = 0; i < 3; i++)
 		{
-			h[i] = CreateWindowEx(0,
+			h[i] = CreateWindowEx(
+				0,
 				"ChildWClass",
 				"ChildTitle", //(LPCTSTR)NULL,
 				WS_CHILD | WS_BORDER
@@ -212,6 +213,15 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lpa
 				(HMENU)(int)(ID_FIRSTCHILD + i),
 				hinst,
 				NULL);
+
+			//HPQ: Oops, windows home does not suport this, on OS level, it's using 'enalbe transparency glass'
+			// Set WS_EX_LAYERED on this window 
+			SetWindowLong(h[i],
+				GWL_EXSTYLE,
+				GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+
+			// Make this window 50% alpha
+			SetLayeredWindowAttributes(h[i], 0, (255 * 50) / 100, LWA_ALPHA);
 		}
 
 		return 0;

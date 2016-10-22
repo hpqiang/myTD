@@ -10,6 +10,8 @@ using namespace std;
 LRESULT CALLBACK 
 RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
+	static RECT prevRECT;
+
 	switch (umsg)
 	{
 		// Check if the window is being destroyed.
@@ -27,27 +29,71 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		}
 
 		case WM_LBUTTONDBLCLK:
-		//case WM_LBUTTONDOWN:
 		{
 			NodeWindow* nodeWindow = new NodeWindow();
 
 			nodeWindow->createWindow(hwnd);
-
 			nodeWindow->createInputObject();
 			nodeWindow->createGraphicsObject();
-
-			BringWindowToTop(nodeWindow->getNodeWindowHandle());
-			ShowWindow(nodeWindow->getNodeWindowHandle(), SW_SHOW);
 
 			WindowManager* wM = WindowManager::getWindowManager();
 			wM->addNodeWindow(nodeWindow);
 
+			BringWindowToTop(nodeWindow->getNodeWindowHandle());
+			ShowWindow(nodeWindow->getNodeWindowHandle(), SW_SHOW);
+
 			return 0;
 		}
 
-		//case WM_TIMER:
-		case WM_PAINT:
+		case WM_ENTERSIZEMOVE: //To do: click on border?
 		{
+			//GetClientRect(hwnd, &prevRECT);
+			GetWindowRect(hwnd, &prevRECT);
+			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&prevRECT, 2);
+			return 0;
+		}
+		case WM_SIZE:   // main window changed size 
+		{
+			RECT rc;
+			// Get the dimensions of the main window's client 
+			// area, and enumerate the child windows. Pass the 
+			// dimensions to the child windows during enumeration. 
+			GetWindowRect(hwnd, &rc);
+			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rc, 2);
+
+			WindowManager* wM = WindowManager::getWindowManager();
+
+			for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
+			{
+				HWND h = nullptr;
+				NodeWindow *nW = wM->findNodeWindow(i);
+				RECT rcChild;
+				float ratioW = ((float)(rc.right - rc.left) / (float)(prevRECT.right - prevRECT.left));
+				float ratioH = ((float)(rc.bottom - rc.top) / (float)(prevRECT.bottom - prevRECT.top));
+
+				//cout << "ratioW: " << ratioW << "\t";
+				//cout << "ratioH: " << ratioH << endl;
+
+				h = nW->getNodeWindowHandle();
+
+				GetWindowRect(h, &rcChild);
+				MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rcChild, 2);
+
+				MoveWindow(h, rcChild.left, rcChild.top, 
+					(rcChild.right - rcChild.left) * ratioW, //Q: Unsafe, is there a winapi?
+					(rcChild.bottom - rcChild.top) * ratioH,
+					true
+				);
+				//ShowWindow(startH, SW_SHOW);
+			}
+
+			return 0;
+		}
+
+		//case WM_PAINT:
+		case USER_1:
+		{
+			//cout << "receiving USER_1...." << endl;
 			HDC hdc;
 			HGDIOBJ original = NULL;
 			RECT startRECT;
@@ -67,11 +113,13 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 				NodeWindow *nW = wM->findNodeWindow(i);
 				
 				startH = nW->getNodeWindowHandle();
-				//toH = nW->getConnectedTo();
-				nW->getConnectedTo(&toH);
+				toH = nW->getConnectedTo();
+				//nW->getConnectedTo(&toH);
 
 				if (toH != nullptr)
 				{
+					//cout << "drawing...." << endl;
+
 					GetWindowRect(startH, &startRECT);
 					//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
 					MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&startRECT, 2);
@@ -80,9 +128,10 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 					MoveToEx(hdc, startRECT.right, startRECT.bottom, NULL);
 					LineTo(hdc, endRECT.left, endRECT.top);
+
+					//break;
 				}
 			}
-
 			ReleaseDC(hwnd, hdc);
 
 			return 0;
