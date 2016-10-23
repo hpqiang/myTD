@@ -13,6 +13,7 @@ public:
 	RootWindow(); 
 	~RootWindow();
 
+	static void insertOneNodeWindow(NodeWindow& nW);
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 	//HWND getRootWindowHandle() const
@@ -34,6 +35,10 @@ protected:
 	int Initialize();
 	void DeInitialize();
 
+	static NodeWindow& addOneNodeWindow(HWND hwnd);
+	static void moveChildWindows(HWND hwnd, RECT prevRECT);
+	static void drawConnection(HWND hwnd); // , HDC hdc);
+
 	bool Frame();
 
 private:
@@ -46,7 +51,7 @@ private:
 	InputClass* m_Input;
 	GraphicsClass* m_Graphics;
 
-	std::list<NodeWindow *> m_NodeWindows;
+	//std::list<NodeWindow *> m_NodeWindows;
 };
 
 #define USER_1 10000

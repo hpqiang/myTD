@@ -19,19 +19,31 @@ public:
 	WindowManager() {}
 	~WindowManager() {}
 
-	size_t getNodeWindowsSize()
+	size_t getNodeWindowsSize() const
 	{
 		return m_NodeWindows.size();
 	}
 
 	void addNodeWindow(NodeWindow* nw)
 	{
-		m_NodeWindows.push_back(nw);
+		try 
+		{
+			//if (m_Mutex.try_lock())
+			std::lock_guard<mutex> lck(m_Mutex);
+			//{
+				m_NodeWindows.push_back(nw);
+			//}
+			//m_Mutex.unlock();
+		}
+		catch(exception& e)
+		{
+			cout << "exception occured" << endl;
+		}
 	}
 
-	NodeWindow* findNodeWindow(int idx)
+	NodeWindow* findNodeWindow(const int idx) const
 	{
-		list<NodeWindow *>::iterator it;
+		list<NodeWindow *>::const_iterator it;
 		int i = 0;
 		for (it = m_NodeWindows.begin(); it != m_NodeWindows.end(); ++it)
 		{
@@ -42,9 +54,9 @@ public:
 		return nullptr;
 	}
 
-	NodeWindow* findNodeWindow(HWND hwnd)
+	NodeWindow* findNodeWindow(HWND hwnd) const
 	{
-		list<NodeWindow *>::iterator it;
+		list<NodeWindow *>::const_iterator it;
 		for (it = m_NodeWindows.begin(); it != m_NodeWindows.end(); ++it)
 		{
 			if ((*it)->getNodeWindowHandle() == hwnd)
@@ -55,23 +67,31 @@ public:
 
 	void deleteNodeWindow(HWND hwnd)
 	{
-		list<NodeWindow *>::iterator it;
-		for (it = m_NodeWindows.begin(); it != m_NodeWindows.end(); ++it)
-		{
-			if ( (*it)->getNodeWindowHandle() == hwnd)
+		try {
+			std::lock_guard<mutex> lck(m_Mutex);
+
+			list<NodeWindow *>::iterator it;
+			for (it = m_NodeWindows.begin(); it != m_NodeWindows.end(); ++it)
 			{
-				m_NodeWindows.erase(it);
-				return;
+				if ((*it)->getNodeWindowHandle() == hwnd)
+				{
+					m_NodeWindows.erase(it);
+					return;
+				}
 			}
+		}
+		catch (exception& e)
+		{
+			cout << "exception here" << endl;
 		}
 		return;
 	}
 
 private:
-	RootWindow* m_RootWindow;
-	HWND	    m_RootWindowHandle;
+	//RootWindow* m_RootWindow;
+	//HWND	    m_RootWindowHandle;
 
 	list<NodeWindow *> m_NodeWindows;
-	mutex muNode;
-	condition_variable condNode;
+	mutex m_Mutex;
+	condition_variable m_CondVar;
 };

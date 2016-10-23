@@ -80,14 +80,15 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\myTD1WindowDLL;C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\Debug;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\myTD1WindowDLL;$(SolutionDir)\myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Debug;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>TARGET_DIR="C:/Users/lcuser/Documents/Visual Studio 2015/Projects/myTD";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\Debug;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Debug;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

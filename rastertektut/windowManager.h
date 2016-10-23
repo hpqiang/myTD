@@ -16,8 +16,13 @@ class WindowManager
 public:
 	static WindowManager *getWindowManager();
 
-	WindowManager() {}
-	~WindowManager() {}
+	WindowManager() 
+	{
+	}
+	~WindowManager() 
+	{
+	
+	}
 
 	size_t getNodeWindowsSize()
 	{
@@ -72,6 +77,6 @@ private:
 	HWND	    m_RootWindowHandle;
 
 	list<NodeWindow *> m_NodeWindows;
-	mutex muNode;
-	condition_variable condNode;
+	mutex m_Mutex;
+	condition_variable m_CondVar;
 };

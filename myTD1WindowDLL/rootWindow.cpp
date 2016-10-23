@@ -1,4 +1,5 @@
 #include <list>
+#include <thread>
 
 #include "windowManager.h"
 #include "nodeWindow.h"
@@ -7,8 +8,13 @@
 #include <iostream>
 using namespace std;
 
-LRESULT CALLBACK 
-RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+void RootWindow::insertOneNodeWindow(NodeWindow& nW)
+{
+	WindowManager* wM = WindowManager::getWindowManager();
+	wM->addNodeWindow(&nW);
+}
+
+LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	static RECT prevRECT;
 
@@ -30,17 +36,41 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 
 		case WM_LBUTTONDBLCLK:
 		{
-			NodeWindow* nodeWindow = new NodeWindow();
+			//NodeWindow* nodeWindow = new NodeWindow();
 
-			nodeWindow->createWindow(hwnd);
-			nodeWindow->createInputObject();
-			nodeWindow->createGraphicsObject();
+			//nodeWindow->createWindow(hwnd);
+			//nodeWindow->createInputObject();
+			//nodeWindow->createGraphicsObject();
 
-			WindowManager* wM = WindowManager::getWindowManager();
-			wM->addNodeWindow(nodeWindow);
+			//WindowManager* wM = WindowManager::getWindowManager();
+			//wM->addNodeWindow(nodeWindow);
 
-			BringWindowToTop(nodeWindow->getNodeWindowHandle());
-			ShowWindow(nodeWindow->getNodeWindowHandle(), SW_SHOW);
+			//BringWindowToTop(nodeWindow->getNodeWindowHandle());
+			//ShowWindow(nodeWindow->getNodeWindowHandle(), SW_SHOW);
+
+
+			//std::thread t = std::thread([&](HWND hwnd)//->void
+			//{
+			//	addOneNodeWindow(hwnd);
+			//}, hwnd);
+
+			//std::thread t = std::thread(addOneNodeWindow, hwnd);
+			//t.join(); //HPQ: do we need to call join? RAII??
+
+			NodeWindow& nW = addOneNodeWindow(hwnd);
+			
+			//insertOneNodeWindow(nW);
+			//HPQ: have to use std::ref????
+			//std::thread t = std::thread(insertOneNodeWindow,nW);
+			//HPQ: Below works fine
+			//std::thread t = std::thread(insertOneNodeWindow,std::ref(nW));
+			//HPQ: Why below works? Not clear invoking method conceptually
+			std::thread t = std::thread([&](NodeWindow& nW) 
+			{
+				insertOneNodeWindow(std::ref(nW));
+			}, std::ref(nW) );
+
+			t.join();//HPQ: do we need to call join? RAII??
 
 			return 0;
 		}
@@ -54,38 +84,40 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		}
 		case WM_SIZE:   // main window changed size 
 		{
-			RECT rc;
-			// Get the dimensions of the main window's client 
-			// area, and enumerate the child windows. Pass the 
-			// dimensions to the child windows during enumeration. 
-			GetWindowRect(hwnd, &rc);
-			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rc, 2);
+			//RECT rc;
+			//// Get the dimensions of the main window's client 
+			//// area, and enumerate the child windows. Pass the 
+			//// dimensions to the child windows during enumeration. 
+			//GetWindowRect(hwnd, &rc);
+			//MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rc, 2);
 
-			WindowManager* wM = WindowManager::getWindowManager();
+			//WindowManager* wM = WindowManager::getWindowManager();
 
-			for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
-			{
-				HWND h = nullptr;
-				NodeWindow *nW = wM->findNodeWindow(i);
-				RECT rcChild;
-				float ratioW = ((float)(rc.right - rc.left) / (float)(prevRECT.right - prevRECT.left));
-				float ratioH = ((float)(rc.bottom - rc.top) / (float)(prevRECT.bottom - prevRECT.top));
+			//for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
+			//{
+			//	HWND h = nullptr;
+			//	NodeWindow *nW = wM->findNodeWindow(i);
+			//	RECT rcChild;
+			//	float ratioW = ((float)(rc.right - rc.left) / (float)(prevRECT.right - prevRECT.left));
+			//	float ratioH = ((float)(rc.bottom - rc.top) / (float)(prevRECT.bottom - prevRECT.top));
 
-				//cout << "ratioW: " << ratioW << "\t";
-				//cout << "ratioH: " << ratioH << endl;
+			//	//cout << "ratioW: " << ratioW << "\t";
+			//	//cout << "ratioH: " << ratioH << endl;
 
-				h = nW->getNodeWindowHandle();
+			//	h = nW->getNodeWindowHandle();
 
-				GetWindowRect(h, &rcChild);
-				MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rcChild, 2);
+			//	GetWindowRect(h, &rcChild);
+			//	MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rcChild, 2);
 
-				MoveWindow(h, rcChild.left, rcChild.top, 
-					(rcChild.right - rcChild.left) * ratioW, //Q: Unsafe, is there a winapi?
-					(rcChild.bottom - rcChild.top) * ratioH,
-					true
-				);
-				//ShowWindow(startH, SW_SHOW);
-			}
+			//	MoveWindow(h, rcChild.left, rcChild.top, 
+			//		(rcChild.right - rcChild.left) * ratioW, //Q: Unsafe, is there a winapi?
+			//		(rcChild.bottom - rcChild.top) * ratioH,
+			//		true
+			//	);
+			//	//ShowWindow(startH, SW_SHOW);
+			//}
+			moveChildWindows(hwnd, prevRECT);
+			SendMessage(hwnd, USER_1, 0, 0);
 
 			return 0;
 		}
@@ -93,46 +125,49 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		//case WM_PAINT:
 		case USER_1:
 		{
-			//cout << "receiving USER_1...." << endl;
-			HDC hdc;
-			HGDIOBJ original = NULL;
-			RECT startRECT;
-			RECT endRECT;
+			////cout << "receiving USER_1...." << endl;
+			//HDC hdc;
+			//HGDIOBJ original = NULL;
+			////RECT startRECT;
+			////RECT endRECT;
 
-			hdc = GetDC(hwnd);
+			//hdc = GetDC(hwnd);
 
-			SelectObject(hdc, GetStockObject(DC_PEN));
-			SetDCPenColor(hdc, RGB(255, 0, 0));
+			//SelectObject(hdc, GetStockObject(DC_PEN));
+			//SetDCPenColor(hdc, RGB(255, 0, 0));
 
-			WindowManager* wM = WindowManager::getWindowManager();
+			drawConnection(hwnd);// , hdc);
 
-			for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
-			{
-				HWND startH = nullptr;
-				HWND toH = nullptr;
-				NodeWindow *nW = wM->findNodeWindow(i);
-				
-				startH = nW->getNodeWindowHandle();
-				toH = nW->getConnectedTo();
-				//nW->getConnectedTo(&toH);
+			RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
+			//WindowManager* wM = WindowManager::getWindowManager();
 
-				if (toH != nullptr)
-				{
-					//cout << "drawing...." << endl;
+			//for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
+			//{
+			//	HWND startH = nullptr;
+			//	HWND toH = nullptr;
+			//	NodeWindow *nW = wM->findNodeWindow(i);
+			//	
+			//	startH = nW->getNodeWindowHandle();
+			//	toH = nW->getConnectedTo();
+			//	//nW->getConnectedTo(&toH);
 
-					GetWindowRect(startH, &startRECT);
-					//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
-					MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&startRECT, 2);
-					GetWindowRect(toH, &endRECT);
-					MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&endRECT, 2);
+			//	if (toH != nullptr)
+			//	{
+			//		//cout << "drawing...." << endl;
 
-					MoveToEx(hdc, startRECT.right, startRECT.bottom, NULL);
-					LineTo(hdc, endRECT.left, endRECT.top);
+			//		GetWindowRect(startH, &startRECT);
+			//		//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
+			//		MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&startRECT, 2);
+			//		GetWindowRect(toH, &endRECT);
+			//		MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&endRECT, 2);
 
-					//break;
-				}
-			}
-			ReleaseDC(hwnd, hdc);
+			//		MoveToEx(hdc, startRECT.right, startRECT.bottom, NULL);
+			//		LineTo(hdc, endRECT.left, endRECT.top);
+
+			//		//break;
+			//	}
+			//}
+			//ReleaseDC(hwnd, hdc);
 
 			return 0;
 		}
@@ -141,7 +176,91 @@ RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
+void RootWindow::moveChildWindows(HWND hwnd, RECT prevRECT)
+{
+	RECT rc;
+	// Get the dimensions of the main window's client 
+	// area, and enumerate the child windows. Pass the 
+	// dimensions to the child windows during enumeration. 
+	GetWindowRect(hwnd, &rc);
+	MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rc, 2);
+
+	WindowManager* wM = WindowManager::getWindowManager();
+
+	for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
+	{
+		HWND h = nullptr;
+		NodeWindow *nW = wM->findNodeWindow(i);
+		RECT rcChild;
+		float ratioW = ((float)(rc.right - rc.left) / (float)(prevRECT.right - prevRECT.left));
+		float ratioH = ((float)(rc.bottom - rc.top) / (float)(prevRECT.bottom - prevRECT.top));
+
+		//cout << "ratioW: " << ratioW << "\t";
+		//cout << "ratioH: " << ratioH << endl;
+
+		h = nW->getNodeWindowHandle();
+
+		GetWindowRect(h, &rcChild);
+		MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rcChild, 2);
+
+		MoveWindow(h, rcChild.left * ratioW, rcChild.top * ratioH, 
+			(rcChild.right - rcChild.left) * ratioW, //Q: Unsafe, is there a winapi?
+			(rcChild.bottom - rcChild.top) * ratioH,
+			true
+		);
+		//ShowWindow(startH, SW_SHOW);
+	}
+
+}
+
+void RootWindow::drawConnection(HWND hwnd)//, HDC hdc)
+{
+	RECT startRECT;
+	RECT endRECT;
+
+	//cout << "receiving USER_1...." << endl;
+	HDC hdc;
+	HGDIOBJ original = NULL;
+	//RECT startRECT;
+	//RECT endRECT;
+
+	hdc = GetDC(hwnd);
+
+	SelectObject(hdc, GetStockObject(DC_PEN));
+	SetDCPenColor(hdc, RGB(255, 0, 0));
+
+	WindowManager* wM = WindowManager::getWindowManager();
+
+	for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
+	{
+		HWND startH = nullptr;
+		HWND toH = nullptr;
+		NodeWindow *nW = wM->findNodeWindow(i);
+		
+		startH = nW->getNodeWindowHandle();
+		toH = nW->getConnectedTo();
+		//nW->getConnectedTo(&toH);
+
+		if (toH != nullptr)
+		{
+			GetWindowRect(startH, &startRECT);
+			//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
+			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&startRECT, 2);
+			GetWindowRect(toH, &endRECT);
+			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&endRECT, 2);
+
+			MoveToEx(hdc, startRECT.right, startRECT.bottom, NULL);
+			LineTo(hdc, endRECT.left, endRECT.top);
+		}
+	}
+	ReleaseDC(hwnd, hdc);
+}
+
 RootWindow::RootWindow()
+	: m_ClassName(""), m_Title("")
+	, m_Style(0), m_hinst(nullptr), m_hwnd(nullptr)
+	, m_Input(nullptr), m_Graphics(nullptr)
+	//, m_NodeWindows({})
 {
 	Initialize();
 }
@@ -153,7 +272,7 @@ RootWindow::~RootWindow()
 
 int RootWindow::Initialize()
 {
-	m_NodeWindows = {};
+	//m_NodeWindows = {};
 
 	m_ClassName = "rootClass";
 	m_Title = "myTD";
@@ -216,17 +335,17 @@ void RootWindow::DeInitialize()
 		m_Graphics = nullptr;
 	}
 
-	if (m_NodeWindows.size() > 0)
-	{
-		for(auto nW:m_NodeWindows)
-		{
-			DestroyWindow(nW->getNodeWindowHandle());
-			delete nW;
-			nW = nullptr;
-		}
-		//HPQ: Destroy the registered class for node windows? 
-		m_NodeWindows.clear();
-	}
+	//if (m_NodeWindows.size() > 0)
+	//{
+	//	for(auto nW:m_NodeWindows)
+	//	{
+	//		DestroyWindow(nW->getNodeWindowHandle());
+	//		delete nW;
+	//		nW = nullptr;
+	//	}
+	//	//HPQ: Destroy the registered class for node windows? 
+	//	m_NodeWindows.clear();
+	//}
 
 	// Remove the window.
 	DestroyWindow(m_hwnd);
@@ -278,6 +397,25 @@ bool RootWindow::createGraphicsObject()
 		return false;
 	}
 	return true;
+}
+
+NodeWindow& RootWindow::addOneNodeWindow(HWND hwnd)
+{
+	//cout << "Hwnd: " << hwnd << endl;
+
+	NodeWindow* nodeWindow = new NodeWindow();
+
+	nodeWindow->createWindow(hwnd);
+	nodeWindow->createInputObject();
+	nodeWindow->createGraphicsObject();
+
+//	WindowManager* wM = WindowManager::getWindowManager();
+//	wM->addNodeWindow(nodeWindow); //To do: mutex and cond_var?
+
+	BringWindowToTop(nodeWindow->getNodeWindowHandle());
+	ShowWindow(nodeWindow->getNodeWindowHandle(), SW_SHOW);
+
+	return *nodeWindow;
 }
 
 bool RootWindow::Frame()

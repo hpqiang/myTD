@@ -21,7 +21,13 @@ LRESULT CALLBACK NodeWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 		case WM_CLOSE:
 		{
 			//cout << "closing..." << endl;
+
 			DestroyWindow(hwnd);
+			return 0;
+		}
+		case WM_MOVE:
+		{
+			SendMessage(GetParent(hwnd), USER_1, 0, 0);
 			return 0;
 		}
 		case WM_SIZE:
@@ -68,6 +74,12 @@ LRESULT CALLBACK NodeWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 }
 
 NodeWindow::NodeWindow()
+	:m_Style(0), m_hwnd(nullptr), m_isContainer(false)
+	, m_isSelected(false), m_isCurrent(false)
+	, m_Input(nullptr), m_Graphics(nullptr)
+	, m_ConnectedFrom(nullptr), m_ConnectedTo(nullptr)
+	, m_Ops(nullptr)
+
 {
 	Initialize();
 }
@@ -79,7 +91,18 @@ NodeWindow::~NodeWindow()
 
 int NodeWindow::Initialize()
 {
-	m_Ops = nullptr;
+	/*m_Style = 0;
+	m_hwnd = nullptr;
+	m_isContainer = false;
+	m_isSelected = false;
+	m_isCurrent = false;
+
+	m_Input = nullptr;
+	m_Graphics = nullptr;
+
+	m_ConnectedFrom = nullptr;
+	m_ConnectedTo = nullptr;
+	m_Ops = nullptr;*/
 
 	if (!m_isInitialized)
 	{

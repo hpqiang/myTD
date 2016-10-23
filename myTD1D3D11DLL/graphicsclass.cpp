@@ -39,6 +39,8 @@ static void printMatrix(D3DXMATRIX m) {
 
 }
 
+#include <string>
+
 bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	bool result;
@@ -48,8 +50,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	//result = m_D3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
-	result = m_D3D->createD3DEnv(/*screenWidth, screenHeight, */VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_D3D->createD3DEnv(VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result) {
 		return false;
 	}
@@ -66,12 +67,12 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	// Initialize the model object.
 	result = m_Model->Initialize(m_D3D->GetDevice(), L"C:/Users/lcuser/Documents/Visual Studio 2015/Projects/myTD/myTD1D3D11DLL/Data/seafloor.dds");
-//C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\myTD1D3D11DLL\Data
-	//result = m_Model->Initialize(m_D3D->GetDevice(), 
-	//	L"C:/Users/lcuser/Documents/Visual Studio 2015/Projects/rastertektut/rastertektut/Data/seafloor.dds");
+
+	//LPCWSTR str = (LPCWSTR)TARGET_FILE;
+	////cout <<  << endl;
+	//result = m_Model->Initialize(m_D3D->GetDevice(), (LPCWSTR)TARGET_FILE );
 	if (!result)
 	{
-		//MessageBox(hwnd, /*L*/"Could not initialize the model object.", /*L*/"Error", MB_OK);
 		return false;
 	}
 

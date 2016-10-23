@@ -10,8 +10,3 @@ WindowManager::getWindowManager()
 	return theWindowManager;
 }
 
-//void
-//WindowManager::run()
-//{
-//	return;
-//}

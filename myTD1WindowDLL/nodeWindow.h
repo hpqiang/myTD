@@ -70,8 +70,11 @@ public:
 	//}
 	void setConnectedTo(const HWND& h)
 	{
-		if (h == nullptr)  //HPQ: ????
-			return;
+		//if (h == nullptr)  //HPQ: ????
+		//{
+		//	m_ConnectedTo = nullptr;
+		//	return;
+		//}
 		m_ConnectedTo = h;
 	}
 

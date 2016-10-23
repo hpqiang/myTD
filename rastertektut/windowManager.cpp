@@ -1,4 +1,4 @@
-#include "WindowManager.h"
+#include "windowManager.h"
 
 static WindowManager* theWindowManager = nullptr;
 
@@ -9,9 +9,3 @@ WindowManager::getWindowManager()
 		theWindowManager = new WindowManager();
 	return theWindowManager;
 }
-
-//void
-//WindowManager::run()
-//{
-//	return;
-//}
