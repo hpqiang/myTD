@@ -33,17 +33,7 @@ public:
 	{
 		return m_hwnd;
 	}
-	//void setNodeWindowHandle(HWND h)
-	//{
-	//	m_hwnd = h;
-	//}
 
-	////Ops *getOps() const
-	//bool getOps(Ops **op)
-	//{
-	//	*op = m_Ops;
-	//	//return m_Ops;
-	//}
 	void setOps(Ops *const op)
 	{
 		m_Ops = op;
@@ -70,11 +60,6 @@ public:
 	//}
 	void setConnectedTo(const HWND& h)
 	{
-		//if (h == nullptr)  //HPQ: ????
-		//{
-		//	m_ConnectedTo = nullptr;
-		//	return;
-		//}
 		m_ConnectedTo = h;
 	}
 
@@ -109,7 +94,7 @@ private:
 	InputClass* m_Input;
 	GraphicsClass* m_Graphics;
 
-	HWND m_ConnectedFrom;
+	HWND m_ConnectedFrom;  //HPQ: TO DO: Detect connect loop
 	HWND m_ConnectedTo;
 
 	Ops *m_Ops;

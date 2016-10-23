@@ -265,6 +265,9 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lpa
 	}
 	case WM_PAINT:
 	{
+		//RECT rect;
+		//GetClientRect(hwnd, &rect);
+		//InvalidateRect(hwnd, &rect, true);
 		return 0;
 	}
 
@@ -283,7 +286,13 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lpa
 
 		//if (!isInSelectMode)
 		if (h == hwnd)
+		{
+			//RECT rect;
+			//GetClientRect(hwnd, &rect);
+			////InvalidateRect(hwnd, &rect, true);
+			//RedrawWindow(hwnd, &rect, NULL, RDW_INVALIDATE);
 			isInSelectMode = true;
+		}
 		else
 			isInSelectMode = false;
 

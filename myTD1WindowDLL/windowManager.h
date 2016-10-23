@@ -88,9 +88,6 @@ public:
 	}
 
 private:
-	//RootWindow* m_RootWindow;
-	//HWND	    m_RootWindowHandle;
-
 	list<NodeWindow *> m_NodeWindows;
 	mutex m_Mutex;
 	condition_variable m_CondVar;

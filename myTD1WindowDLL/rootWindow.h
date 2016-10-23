@@ -4,8 +4,6 @@
 
 #include <Windows.h>
 #include "nodeWindow.h"
-//#include "inputclass.h"
-//#include "graphicsclass.h"
 
 class __declspec(dllexport) RootWindow
 {
@@ -15,15 +13,6 @@ public:
 
 	static void insertOneNodeWindow(NodeWindow& nW);
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-	//HWND getRootWindowHandle() const
-	//{
-	//	return m_hwnd;
-	//}
-	//void setRootWindowHandle(const HWND&& h)
-	//{
-	//	m_hwnd = h;
-	//}
 
 	void displayWindow();
 	void run();
@@ -37,7 +26,7 @@ protected:
 
 	static NodeWindow& addOneNodeWindow(HWND hwnd);
 	static void moveChildWindows(HWND hwnd, RECT prevRECT);
-	static void drawConnection(HWND hwnd); // , HDC hdc);
+	static void drawConnection(HWND hwnd);
 
 	bool Frame();
 
@@ -50,8 +39,6 @@ private:
 
 	InputClass* m_Input;
 	GraphicsClass* m_Graphics;
-
-	//std::list<NodeWindow *> m_NodeWindows;
 };
 
 #define USER_1 10000

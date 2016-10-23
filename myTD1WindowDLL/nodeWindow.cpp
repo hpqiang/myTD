@@ -91,19 +91,6 @@ NodeWindow::~NodeWindow()
 
 int NodeWindow::Initialize()
 {
-	/*m_Style = 0;
-	m_hwnd = nullptr;
-	m_isContainer = false;
-	m_isSelected = false;
-	m_isCurrent = false;
-
-	m_Input = nullptr;
-	m_Graphics = nullptr;
-
-	m_ConnectedFrom = nullptr;
-	m_ConnectedTo = nullptr;
-	m_Ops = nullptr;*/
-
 	if (!m_isInitialized)
 	{
 		m_Style = CS_HREDRAW | CS_VREDRAW;
