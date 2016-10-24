@@ -5,6 +5,14 @@
 #include <Windows.h>
 #include "nodeWindow.h"
 
+#define IDM_FILE_NEW 1
+#define IDM_FILE_OPEN 2
+#define IDM_FILE_QUIT 3
+
+#define IDM_EDIT_CUT 4
+#define IDM_EDIT_COPY 5
+#define IDM_EDIT_PASTE 6
+
 class __declspec(dllexport) RootWindow
 {
 public:
@@ -26,7 +34,7 @@ protected:
 
 	static NodeWindow& addOneNodeWindow(HWND hwnd);
 	static void moveChildWindows(HWND hwnd, RECT prevRECT);
-	static void drawConnection(HWND hwnd);
+	static void drawConnection(HWND hwnd, bool);
 
 	bool Frame();
 

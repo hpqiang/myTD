@@ -14,12 +14,67 @@ void RootWindow::insertOneNodeWindow(NodeWindow& nW)
 	wM->addNodeWindow(&nW);
 }
 
+//HPQ: refer to http://zetcode.com/gui/winapi/menus/
+void AddMenu(HWND hwnd)
+{
+	HMENU hMenubar; // [2];
+	HMENU hMenu; // [2];
+
+	hMenubar/*[0]*/ = CreateMenu();
+	//hMenubar[1] = CreateMenu();
+	hMenu = CreateMenu();
+
+	AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
+	AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
+	AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
+	AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
+
+	AppendMenuW(hMenubar, MF_POPUP, (UINT_PTR)hMenu, L"&File");
+	SetMenu(hwnd, hMenubar);
+
+	//hMenu[1] = CreateMenu();
+
+	//AppendMenuW(hMenu[1], MF_STRING, IDM_EDIT_CUT, L"&Cut");
+	//AppendMenuW(hMenu[1], MF_STRING, IDM_EDIT_COPY, L"&Copy");
+	////AppendMenuW(hMenu[1], MF_SEPARATOR, 0, NULL);
+	//AppendMenuW(hMenu[1], MF_STRING, IDM_EDIT_PASTE, L"&Paste");
+
+	//AppendMenuW(hMenubar[1], MF_POPUP, (UINT_PTR)hMenu[1], L"&Edit");
+	//SetMenu(hwnd, hMenubar[1]);
+
+}
+
 LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	static RECT prevRECT;
+	static bool bPrevLine = false;
 
 	switch (umsg)
 	{
+		case WM_CREATE:
+		{
+			AddMenu(hwnd);
+			return 0;
+		}
+
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wparam)) {
+
+			case IDM_FILE_NEW:
+			case IDM_FILE_OPEN:
+
+				MessageBeep(MB_ICONINFORMATION);
+				break;
+
+			case IDM_FILE_QUIT:
+
+				SendMessage(hwnd, WM_CLOSE, 0, 0);
+				break;
+			}
+
+			break;
+		}
 		// Check if the window is being destroyed.
 		case WM_DESTROY:
 		{
@@ -66,10 +121,21 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 
 			return 0;
 		}
+		case WM_LBUTTONDOWN:
+		{
+			bPrevLine = true;
+			return 0;
+		}
+
+		case WM_LBUTTONUP:
+		{
+			bPrevLine = false;
+			return 0;
+		}
 
 		case USER_1:
 		{
-			drawConnection(hwnd);// , hdc);
+			drawConnection(hwnd, bPrevLine);// , hdc);
 			//RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
 
 			return 0;
@@ -115,7 +181,7 @@ void RootWindow::moveChildWindows(HWND hwnd, RECT prevRECT)
 
 }
 
-void RootWindow::drawConnection(HWND hwnd)
+void RootWindow::drawConnection(HWND hwnd, bool bPrevLine)
 {
 	RECT startRECT;
 	RECT endRECT;
@@ -123,7 +189,7 @@ void RootWindow::drawConnection(HWND hwnd)
 	HGDIOBJ original = NULL;
 	static POINT prevFrom;
 	static POINT prevTo;
-	static bool bPrevLine = false;
+	//static bool bPrevLine = false;
 
 	hdc = GetDC(hwnd);
 
@@ -137,7 +203,8 @@ void RootWindow::drawConnection(HWND hwnd)
 		HWND startH = nullptr;
 		HWND toH = nullptr;
 		NodeWindow *nW = wM->findNodeWindow(i);
-		
+		bPrevLine = false;
+
 		startH = nW->getNodeWindowHandle();
 		toH = nW->getConnectedTo();
 		//nW->getConnectedTo(&toH);
@@ -150,6 +217,7 @@ void RootWindow::drawConnection(HWND hwnd)
 			GetWindowRect(toH, &endRECT);
 			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&endRECT, 2);
 
+			//HPQ: refer to http://winapi.freetechsecrets.com/win32/WIN32Drawing_Lines_with_the_Mouse.htm
 			SetROP2(hdc, R2_NOTXORPEN);
 
 			if (bPrevLine) {
@@ -170,6 +238,7 @@ void RootWindow::drawConnection(HWND hwnd)
 			prevTo.y = endRECT.top;
 			bPrevLine = true;
 		}
+
 	}
 	ReleaseDC(hwnd, hdc);
 }
@@ -205,7 +274,7 @@ int RootWindow::Initialize()
 	wcex.hIcon = LoadIcon(m_hinst, IDI_WINLOGO);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;
+	wcex.lpszMenuName = "simple menu"; //MAKEINTRESOURCE(IDM_MYMENURESOURCE); //NULL;
 	wcex.lpszClassName = m_ClassName;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_WINLOGO);
 	if (!RegisterClassEx(&wcex))
