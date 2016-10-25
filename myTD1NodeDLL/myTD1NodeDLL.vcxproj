@@ -71,6 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -145,10 +147,25 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="2DOP.h" />
+    <ClInclude Include="3DOP.h" />
+    <ClInclude Include="CommonDefs.h" />
+    <ClInclude Include="Content.h" />
+    <ClInclude Include="D3DOP.h" />
+    <ClInclude Include="inputclass.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="OGLOP.h" />
+    <ClInclude Include="OP.h" />
+    <ClInclude Include="rootWindow.h" />
+    <ClInclude Include="TDFactory.h" />
+    <ClInclude Include="TDManager.h" />
+    <ClInclude Include="TDSingleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="rootWindow.cpp" />
+    <ClCompile Include="TDManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

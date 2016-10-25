@@ -69,8 +69,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\myDLL;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\myTD1NodeDLL;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,8 +116,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\myDLL\myDLL.vcxproj">
-      <Project>{88fccdb4-4fa1-4c4a-9764-2e123655b616}</Project>
+    <ProjectReference Include="..\myTD1NodeDLL\myTD1NodeDLL.vcxproj">
+      <Project>{9df8d041-8ecb-4ea5-8d35-1d5c9919061f}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
