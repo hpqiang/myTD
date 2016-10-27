@@ -1,8 +1,7 @@
 #include <list>
 #include <thread>
 
-//#include "windowManager.h"
-//#include "nodeWindow.h"
+#include "TDManager.h"
 #include "rootWindow.h"
 
 #include <iostream>
@@ -14,30 +13,134 @@ using namespace std;
 //	wM->addNodeWindow(&nW);
 //}
 
+//Q: Error moving below menu defs to rootWindow.h???
+typedef struct Menu
+{
+	uint id;
+	const char* menuTitle;
+}PMenu;
+
+typedef struct MenuItem
+{
+	uint menuId;
+	uint id;
+	const char * menuItemTitle;
+	string command;
+}PMenuItem;
+
+Menu mainMenu[] =
+{
+	{ 1, "&File" },
+	{ 2, "&Edit" },
+	{ 3, "&Window" },
+	{ 4, "&Help" },
+	{ 5, "&Quit" }
+};
+
+MenuItem mainMenuItem[] =
+{
+	{ 1, 1, "&New", "" },
+	{ 1, 2, "&Load", "" },
+	{ 1, 3, "&Save", "" },
+	{ 1, 4, "Save &As...","" },
+	{ 1, 0, NULL, "" },
+	{ 1, 6, "&Quit","" },
+
+	{ 2, 1, "&Cut","" },
+	{ 2, 2, "&Copy","" },
+	{ 2, 3, "&Paste","" },
+
+	{ 3, 1, "&Python","" },
+	{ 3, 2, "&Text","" },
+	{ 3, 3, "&Table","" },
+
+	{ 4, 1, "&About","" },
+	{ 4, 2, "&Help","" },
+};
+
+//Note: ids have to be unique
+Menu popUpMenu[] =
+{
+	{ 101, "&Node Win" },
+	{ 102, "&Node OP" },
+};
+
+MenuItem popUpMenuItem[] =
+{
+	{ 101, 201, "&2D Win","Create Node Win" },
+	{ 101, 202, "&D3D Win","" },
+	{ 101, 203, "&OGL Win","" },
+	{ 101, 204, "&Audio Win","" },
+	{ 101, 205, "&Video Win","" },
+	{ 101, 205, "&Camera Win","" },
+
+	{ 102, 301, "&2D OP","" },
+	{ 102, 302, "&D3D OP","" },
+	{ 102, 303, "&OGL OP","" },
+	{ 102, 304, "&Camera OP","" },
+};
+
 //HPQ: refer to http://zetcode.com/gui/winapi/menus/
 void AddMenu(HWND hwnd)
 {
-	HMENU hMenubar; // [2];
-	HMENU hMenu; // [2];
+	HMENU hMenubar; 
+	HMENU hMenu; 
+	HMENU hSubMenu;
 
-	hMenubar/*[0]*/ = CreateMenu();
-	//hMenubar[1] = CreateMenu();
+	hMenubar = CreateMenu();
 	hMenu = CreateMenu();
+	hSubMenu = CreatePopupMenu();
 
-	AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
-	AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
-	AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
-	AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
-
-	AppendMenuW(hMenubar, MF_POPUP, (UINT_PTR)hMenu, L"&File");
+	for (int i = 0; i < sizeof(mainMenu) / sizeof(mainMenu[0]); i++)
+	{
+		hMenu = CreateMenu();
+		for (int j = 0; j < sizeof(mainMenuItem) / sizeof(mainMenuItem[0]); j++)
+		{
+			if (mainMenu[i].id == mainMenuItem[j].menuId)
+			{
+				AppendMenu(hMenu, MF_STRING, mainMenuItem[j].id, mainMenuItem[j].menuItemTitle);
+			}
+		}
+		AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hMenu, mainMenu[i].menuTitle);
+	}
 	SetMenu(hwnd, hMenubar);
+}
 
+void createPopUpMenu(HWND hwnd, LPARAM lParam)
+{
+	POINT point;
+	HMENU hMenu;
+	HMENU hSubMenu;
+
+	point.x = LOWORD(lParam);
+	point.y = HIWORD(lParam);
+
+	hMenu = CreatePopupMenu();
+	ClientToScreen(hwnd, &point);
+
+	for (int i = 0; i < sizeof(popUpMenu) / sizeof(popUpMenu[0]); i++)
+	{
+		hSubMenu = CreatePopupMenu();
+
+		for (int j = 0; j < sizeof(popUpMenuItem) / sizeof(popUpMenuItem[0]); j++)
+		{
+			if (popUpMenu[i].id == popUpMenuItem[j].menuId)
+			{
+				AppendMenu(hSubMenu, MF_STRING | MF_POPUP, popUpMenuItem[j].id, popUpMenuItem[j].menuItemTitle);
+			}
+		}
+		AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hSubMenu, popUpMenu[i].menuTitle);
+	}
+	TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, point.x, point.y, 0, hwnd, NULL);
+	DestroyMenu(hMenu);
 }
 
 LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	static RECT prevRECT;
 	static bool bPrevLine = false;
+	TDManager* td_Manager = nullptr;
+	TDManager::myEvent e;
 
 	switch (umsg)
 	{
@@ -47,22 +150,45 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 			return 0;
 		}
 
+		case WM_RBUTTONUP:
+		{
+			createPopUpMenu(hwnd, lparam);
+
+			break;
+		}
+
 		case WM_COMMAND:
 		{
-			switch (LOWORD(wparam)) {
-
-			case IDM_FILE_NEW:
-			case IDM_FILE_OPEN:
-
-				MessageBeep(MB_ICONINFORMATION);
-				break;
-
-			case IDM_FILE_QUIT:
-
-				SendMessage(hwnd, WM_CLOSE, 0, 0);
-				break;
+			for (int i = 0; i < sizeof(mainMenu) / sizeof(mainMenu[0]); i++)
+			{
+				for (int j = 0; j < sizeof(mainMenuItem) / sizeof(mainMenuItem[0]); j++)
+				{
+					if (mainMenuItem[j].id == LOWORD(wparam))
+					{
+						cout << "MAIN: This: " << LOWORD(wparam)<< " is clicked..." << endl;
+					}
+				}
 			}
 
+			//for (int i = 0; i < sizeof(popUpMenu) / sizeof(popUpMenu[0]); i++)
+			{
+				for (int j = 0; j < sizeof(popUpMenuItem) / sizeof(popUpMenuItem[0]); j++)
+				{
+					if (popUpMenuItem[j].id == LOWORD(wparam))
+					{
+						//cout << "This: " << LOWORD(wparam) << " is clicked..." << endl;
+						//cout << "POPUP: **********with command: " << popUpMenuItem[j].command.c_str() << endl;
+						e.event = popUpMenuItem[j].id;//To do: Should translate msgs like this?
+						e.hwnd = hwnd;
+						e.command = popUpMenuItem[j].command;
+						e.wparam = (uint *)wparam;
+						e.lparam = (long *)lparam;
+						td_Manager = TDSingleton<TDManager>::getInstance();
+						for (int i = 0; i < 10; i++)  //Hehe: testing
+							td_Manager->sendEvent(e);
+					}
+				}
+			}
 			break;
 		}
 		// Check if the window is being destroyed.
@@ -122,6 +248,7 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 //			bPrevLine = false;
 			return 0;
 		}
+
 
 		//case USER_1:
 		//{
@@ -413,12 +540,19 @@ void RootWindow::run()
 
 	// Loop until there is a quit message from the window or the user.
 	done = false;
+	TDManager* td_Manager = TDSingleton<TDManager>::getInstance();
+
 	while (!done)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+		}
+
+		while (td_Manager->getEventQueueSize() > 0)
+		{
+			td_Manager->processEvent();
 		}
 
 		// If windows signals to end the application then exit out.

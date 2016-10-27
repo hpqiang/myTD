@@ -39,22 +39,25 @@
     <ClInclude Include="Content.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="2DOP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="3DOP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DOP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OGLOP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="rootWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeWin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeOP3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeOP2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeOPD3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeOPOGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeOP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -69,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="rootWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeWin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

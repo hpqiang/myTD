@@ -114,11 +114,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="tabWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\myTD1NodeDLL\myTD1NodeDLL.vcxproj">
       <Project>{9df8d041-8ecb-4ea5-8d35-1d5c9919061f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tabWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,17 +3,9 @@
 #include <list>
 
 #include <Windows.h>
-//#include "nodeWindow.h"
+#include "NodeWin.h"
 
-#define IDM_FILE_NEW 1
-#define IDM_FILE_OPEN 2
-#define IDM_FILE_QUIT 3
-
-#define IDM_EDIT_CUT 4
-#define IDM_EDIT_COPY 5
-#define IDM_EDIT_PASTE 6
-
-class /*__declspec(dllexport)*/ RootWindow
+class __declspec(dllexport) RootWindow
 {
 public:
 	RootWindow(); 
@@ -24,6 +16,15 @@ public:
 
 	void displayWindow();
 	void run();
+
+	HINSTANCE getInstance()
+	{
+		return m_hinst;
+	}
+	HWND getHwnd()
+	{
+		return m_hwnd;
+	}
 
 	bool createInputObject();
 	bool createGraphicsObject();
@@ -48,5 +49,3 @@ private:
 //	InputClass* m_Input;
 //	GraphicsClass* m_Graphics;
 };
-
-//#define USER_1 10000

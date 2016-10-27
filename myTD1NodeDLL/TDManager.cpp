@@ -1,6 +1,7 @@
 #include "TDManager.h"
 #include "rootWindow.h"
 
+#include "NodeWin.h"
 
 TDManager::TDManager()
 	:m_NodeManager(nullptr), m_ContentManager(nullptr)
@@ -11,6 +12,7 @@ TDManager::TDManager()
 
 TDManager::~TDManager()
 {
+	cout << "calling " << __FUNCTION__ << endl;
 	if (m_NodeManager)
 	{
 		delete m_NodeManager;
@@ -22,21 +24,21 @@ TDManager::~TDManager()
 		m_ContentManager = nullptr;
 	}
 
-	for (map<INode*, list<IContent*>>::iterator it = m_Node_Contents.begin();
+	for (map<INode*, IContent*>::iterator it = m_Node_Contents.begin();
 		it != m_Node_Contents.end(); ++it)
-	{
-		if ((*it).second.size() > 0)
-		{
-			for (IContent* l : it->second)
-				if (l)
-				{
-					delete l;
-				}
-			(*it).second.clear();
-			it++; //Q: Necessary? 
-		}
-		else
-			it++;
+	{  //HPQ: To do later
+		////if ((*it).second.size() > 0)
+		//{
+		//	for (IContent* l : it->second)
+		//		if (l)
+		//		{
+		//			delete l;
+		//		}
+		//	(*it).second.clear();
+		//	it++; //Q: Necessary? 
+		//}
+		//else
+		//	it++;
 	}
 	m_Node_Contents.clear();
 
@@ -58,8 +60,8 @@ bool TDManager::createRootWindow()
 {
 	m_RootWindow = new RootWindow();
 
-	m_RootWindow->displayWindow();
-	m_RootWindow->run();
+	//m_RootWindow->displayWindow();
+	//m_RootWindow->run();
 
 	return TRUE;
 }

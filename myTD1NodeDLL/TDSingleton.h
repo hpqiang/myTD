@@ -24,6 +24,7 @@ public:
 	}
 private:
 	//TDSingleton(const TDSingleton&) {}  //Prevent copy cstor from happening
+	~TDSingleton() {}  //Don't allow others to call dstor
 	static T* m_Instance;
 };
 

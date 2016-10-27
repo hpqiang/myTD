@@ -147,15 +147,16 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="2DOP.h" />
-    <ClInclude Include="3DOP.h" />
+    <ClInclude Include="NodeOP2D.h" />
+    <ClInclude Include="NodeOP3D.h" />
     <ClInclude Include="CommonDefs.h" />
     <ClInclude Include="Content.h" />
-    <ClInclude Include="D3DOP.h" />
+    <ClInclude Include="NodeOPD3D.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="Node.h" />
-    <ClInclude Include="OGLOP.h" />
-    <ClInclude Include="OP.h" />
+    <ClInclude Include="NodeWin.h" />
+    <ClInclude Include="NodeOPOGL.h" />
+    <ClInclude Include="NodeOP.h" />
     <ClInclude Include="rootWindow.h" />
     <ClInclude Include="TDFactory.h" />
     <ClInclude Include="TDManager.h" />
@@ -164,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="NodeWin.cpp" />
     <ClCompile Include="rootWindow.cpp" />
     <ClCompile Include="TDManager.cpp" />
   </ItemGroup>

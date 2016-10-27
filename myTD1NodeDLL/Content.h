@@ -28,26 +28,26 @@ private:
 	string	m_Source;
 };
 
-class TextContent :public Content
-{
-public:
-private:
+//class TextContent :public Content  //Note: Move to 'Text' menu
+//{
+//public:
+//private:
+//
+//};
+//
+//class TableContent :public Content  //Note: Move to 'Table' menu
+//{
+//public:
+//private:
+//
+//};
 
-};
-
-class TableContent :public Content
-{
-public:
-private:
-
-};
-
-class PythonContent :public Content
-{
-public:
-private:
-
-};
+//class PythonContent :public Content  //Note: Move to 'Python' menu
+//{
+//public:
+//private:
+//
+//};
 
 class _2DContent :public Content
 {

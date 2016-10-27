@@ -180,6 +180,8 @@ bool InputClass::ReadKeyboard()
 	return true;
 }
 
+#include <iostream>
+using namespace std;
 
 bool InputClass::ReadMouse()
 {
@@ -187,6 +189,11 @@ bool InputClass::ReadMouse()
 
 
 	// Read the mouse device.
+	if (m_mouse == nullptr)
+	{
+		cout << "mouse is nullptr " << endl;
+		return false;
+	}
 	result = m_mouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&m_mouseState);
 	if(FAILED(result))
 	{

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+#include <queue>
 #include <list>
 #include <map>
 #include <mutex>
@@ -14,7 +16,6 @@ using namespace std;
 #include "CommonDefs.h"
 #include "Content.h"
 #include "inputclass.h"
-
 
 class INode
 {
@@ -113,15 +114,5 @@ private:
 	uint	m_NumOfNodeOut;
 
 	IContent& m_Content;
-};
-
-class NodeWin :public Node
-{
-public:
-	//To do: How to deal with WndProc?
-
-private:
-	HWND m_HwndNodwWindow;
-	InputClass* m_InputClass;
 };
 

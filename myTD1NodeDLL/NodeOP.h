@@ -2,6 +2,7 @@
 
 #include "CommonDefs.h"
 #include "Node.h"
+#include "NodeOP3D.h"
 
 class IOP
 {
