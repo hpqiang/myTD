@@ -3,7 +3,7 @@
 #include <list>
 
 #include <Windows.h>
-#include "NodeWin.h"
+//#include "NodeWin.h"
 
 class __declspec(dllexport) RootWindow
 {

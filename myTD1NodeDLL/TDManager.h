@@ -7,6 +7,7 @@ using namespace std;
 #include "Content.h"
 #include "rootWindow.h"
 #include "TDSingleton.h"
+#include "TDFactory.h"
 
 #include <thread>
 
@@ -56,6 +57,63 @@ private:
 
 };
 
+#define MYRESULT uint
+//For LNK2005 error, add /FORCE:MULTIPLE in linker option: http://stackoverflow.com/questions/10046485/error-lnk2005-already-defined
+
+//Q: To do: Better use of variadic template???
+/*MYRESULT*/int  test1(string s, uint x = 0, long y = 0L)
+{
+	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
+	return 1;
+}
+/*MYRESULT*/ int test2(string s, uint x = 0, long y = 0L)
+{
+	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
+	return 2;
+}
+/*MYRESULT*/int test3(string s, uint x = 0, long y = 0L)
+{
+	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
+	return 3;
+}
+
+template<typename R, typename... Args>
+struct testcallback
+{
+	string c;
+	//void (*func)(int i);
+	R (*func)(Args... args);
+	//template<typename... Args>
+	//MYRESULT (*func)(Args... args);
+
+};
+
+testcallback<int, string, uint, long> testCallBack[] =
+//testcallback testCallBack[] = 
+{
+	{ "1", test1 },
+	{ "2", test2 },
+	{ "3", test3 }
+};
+
+
+
+//Q: Cannot be inside the TDManager class def? 
+
+
+//template<typename... Args>
+//struct myCommand_ActionList
+//{
+//	string command;
+//	MYRESULT (*func)(Args... args);
+//};
+//
+//myCommand_ActionList<int> Command_ActionList[] =
+//{
+//	{"Create Node Win", &(TDManager::test)},
+//	{"", TDManager::noCommand}
+//};
+
 //Q: Callback funcs and shared_ptr???
 //Q: For Input, to depend on DirectInput8 only????
 //Q: Which class should be __declspec(dllexport) ???
@@ -65,27 +123,27 @@ class __declspec(dllexport) TDManager
 public:
 	typedef struct /*__declspec(dllexport)*/ myEvent
 	{
-		uint event;
-		HWND hwnd;
-		string command;
-		uint* wparam;
-		long* lparam;
+		uint	event;
+		HWND	hwnd;
+		string	command;
+		uint	wparam;
+		long	lparam;
 	}*PmyEvent;
 
-	template<typename... Args>
-	struct myCommand_Action
-	{
-		string command;
-		void   (*action)(Args... args); //Q: ???
-	};
-	
-	template<typename... Args>
-	struct myCallback
-	{
-		void (*func)(Args...);
-	};
-	 
 	//typedef myCallback<myEvent> *PmyCallback;
+
+	template<typename R, typename... Args>
+	struct myCommand_Callback
+	{
+		string command;  //command
+		R (*func)(Args... args);
+	};
+
+	myCommand_Callback<int, void *, string, myEvent> Command_Callback[1] = //Q: Why 1 is necessary here?
+	{
+		{ "Create Node Win", TDManager::createNodeWin }//this->createNodeWin }
+											//{ "", test3 }
+	};
 
 
 public:
@@ -118,6 +176,14 @@ public:
 
 		processEachEvent(e);
 
+		////cout << "event processed ..." << endl;
+		//for (int i = 0; i < sizeof(testCallBack)/sizeof(testCallBack[0]); i++)
+		//{
+		//	//cout << testCallBack[i].c.c_str() << endl;
+		//	int x = (*(testCallBack[i].func))("This is a test string", e.wparam, e.lparam);  //Note: Mind the notation!!!
+		//	//cout << "returning: " << x << endl;
+		//}
+
 		//static int i = 0;
 		//std::thread t = std::thread(&TDManager::createNode<Node>, e, i++);
 
@@ -130,6 +196,18 @@ public:
 	uint getEventQueueSize()
 	{
 		return m_Events.size();
+	}
+
+	MYRESULT test(int i)
+	{
+		cout << "i= " << i << endl;
+		return 1;
+	}
+
+	MYRESULT noCommand()
+	{
+		cout << "noCommand " << endl;
+		return 1;
 	}
 
 	////template<class T>
@@ -168,24 +246,58 @@ public:
 	void processEachEvent(const myEvent& e)
 	{
 		//cout << "---------->Poping up e.command is : " << e.command.c_str() << endl;
-		if (e.command == "Create Node Win")
+		for (int i = 0; i < sizeof(Command_Callback) / sizeof(Command_Callback[0]); i++)
 		{
-			//step1: create and display the node window
-			NodeWin* nW = new NodeWin();
-
-			nW->createWindow(e.hwnd);
-			nW->createInputObject();
-			nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
-
-			//delete nW;
-			//nW = nullptr;
-
-			//step2: add this node window to NodeManager
+			if (e.command == Command_Callback[i].command)
+			{
+				int x = (*(Command_Callback[i].func))(this, "This is a test string", e);
+			}
 		}
-		else
-		{
-			cout << "More to do hereafter..." << endl;
-		}
+		//if (e.command == "Create Node Win")
+		//{
+		//	//step1: create and display the node window
+		//	//NodeWin* nW = new NodeWin();
+		//	TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
+		//	NodeWin *nW = f->getInstance();
+
+		//	nW->createWindow(e.hwnd);
+		//	nW->createInputObject();
+		//	nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+
+		//	//delete nW;
+		//	//nW = nullptr;
+
+		//	//step2: add this node window to NodeManager
+		//}
+		//else
+		//{
+		//	cout << "More to do hereafter..." << endl;
+		//}
+	}
+
+	static int createNodeWin(void * this_Ptr, string s, myEvent e)
+	{
+		//Q: Jesus, took me so long to find this! 
+		TDManager* self = (TDManager *)this_Ptr;
+
+		cout << __FUNCTION__ << endl;
+		//step1: create and display the node window
+		//NodeWin* nW = new NodeWin();
+		TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
+		NodeWin *nW = f->getInstance();
+
+		nW->createWindow(e.hwnd);
+		nW->createInputObject();
+		nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+
+		//delete nW;
+		//nW = nullptr;
+
+		//step2: add this node window to NodeManager
+		self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
+		self->m_NodeManager->addNode(nW);
+		cout << self->m_NodeManager->getNodesSize() << endl;
+		return 1;
 	}
 
 private:
@@ -208,4 +320,5 @@ private:
 	//InputClass*		m_Input;   //Temp: use DirectInput8 for now, this one for root window
 
 };
+
 
