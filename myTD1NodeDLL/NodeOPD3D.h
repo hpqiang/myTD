@@ -1,7 +1,26 @@
 #pragma once
-#include "OP.h"
+#include "NodeOP.h"
 
-#include <D3DX10math.h>
+//#include <D3DX10math.h>
+
+struct myRotation
+{
+	float m_Rx;  //In radian
+	float m_Ry;
+	float m_Rz;
+};
+struct myTranslation
+{
+	float m_Tx;
+	float m_Ty;
+	float m_Tz;
+};
+struct myScalar
+{
+	float m_Sx;
+	float m_Sy;
+	float m_Sz;
+};
 
 typedef struct GeometryOP
 {
@@ -10,9 +29,10 @@ public:
 	GeometryOP(const GeometryOP& c) {}
 	~GeometryOP() {}
 private:
-	D3DMATRIX m_World; //To do: use a common Matrix
-	D3DMATRIX m_View;
-	D3DMATRIX m_Projection;
+	myRotation		m_Rotation;
+	myTranslation	m_Translation;
+	myScalar		m_Scalar;
+
 }*PGeometryOP;
 
 typedef struct LightOP
@@ -50,8 +70,50 @@ class NodeOPD3D :public NodeOP
 {
 public:
 private:
+	//PGeometryOP m_OP3DGeometry;
+	//PLightOP	m_OP3DLight;
+	//PMaterialOP m_OP3DMaterial;
+	//PTextureOP	m_OP3DTexture;
+};
+
+class PropertyWin : public NodeWin //Temp: Should not derived from NodeWin?
+{
+
+};
+
+class PropertyWinD3DGeometry : public PropertyWin
+{
+public:
+
+private:
+
+};
+
+class NodeOPD3DGeometry : public NodeOPD3D
+{
+public:
+private:
 	PGeometryOP m_OP3DGeometry;
+	PropertyWinD3DGeometry* m_PropertyWin;
+};
+
+class NodeOPD3DLight : public NodeOPD3D
+{
+public:
+private:
 	PLightOP	m_OP3DLight;
+};
+
+class NodeOPD3DMaterial : public NodeOPD3D
+{
+public:
+private:
 	PMaterialOP m_OP3DMaterial;
+};
+
+class NodeOPD3DTexture : public NodeOPD3D
+{
+public:
+private:
 	PTextureOP	m_OP3DTexture;
 };

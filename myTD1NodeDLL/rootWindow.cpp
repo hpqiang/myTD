@@ -75,7 +75,7 @@ MenuItem popUpMenuItem[] =
 	{ 101, 205, "&Camera Win","" },
 
 	{ 102, 301, "&2D OP","" },
-	{ 102, 302, "&D3D OP","" },
+	{ 102, 302, "&D3D OP","Create Node OP D3D" },
 	{ 102, 303, "&OGL OP","" },
 	{ 102, 304, "&Camera OP","" },
 };
@@ -184,7 +184,7 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 						e.wparam = wparam;
 						e.lparam = lparam;
 						td_Manager = TDSingleton<TDManager>::getInstance();
-						for (int i = 0; i < 2; i++)  //Hehe: testing
+						//for (int i = 0; i < 2; i++)  //Hehe: testing
 							td_Manager->sendEvent(e);
 					}
 				}

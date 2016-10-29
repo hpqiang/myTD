@@ -5,7 +5,7 @@
 
 bool NodeWin::m_isInitialized = false;
 string NodeWin::m_ClassName = "nodeWinClass";
-string NodeWin::m_Title = "nodeWin";
+//string NodeWin::m_Title = "nodeWin";
 
 //To do: should use the one in rootWindow.cpp????
 void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
@@ -263,13 +263,14 @@ void NodeWin::DeInitialize()
 	m_hwnd = NULL;
 }
 
-int NodeWin::createWindow(HWND parentHwnd)
+int NodeWin::createWindow(HWND parentHwnd, const string& title)
 {
 	static int i = 0;
-	string title = string(m_Title);
-
+	//string title = string(m_Title);
+	string myTitle = title;
 	string s = "-" + to_string(i);
-	title += s;
+	myTitle += s;
+	m_Title = myTitle;
 
 	// Create the node window. 
 	m_hwnd = CreateWindowEx(

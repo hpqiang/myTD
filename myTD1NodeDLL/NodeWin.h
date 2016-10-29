@@ -28,9 +28,11 @@ NodeMenuItem NodePopUpMenuItem[] =
 {
 	{ 301, 401, "&Load Texture","Load Texture" },
 	{ 301, 402, "&Load Shader","Load Shader" },
+	{ 301, 403, "&Geometry","Geometry" },
 
 	{ 302, 501, "&Load Texture","Load Texture" },
 	{ 302, 502, "&Load Shader","Load Shader" },
+	{ 302, 503, "&Geometry","Geometry" },
 };
 
 class __declspec(dllexport) NodeWin :public Node
@@ -47,12 +49,14 @@ public:
 
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-	int createWindow(HWND);
+	int createWindow(HWND, const string& title);
 	bool displayWindow();
 
 	bool createInputObject();
 	//bool createGraphicsObject();
 
+	virtual void Render() override
+	{}
 	//bool Frame();
 
 protected:
@@ -62,7 +66,7 @@ protected:
 
 protected:
 	static string m_ClassName;
-	static string m_Title;
+	/*static*/ string m_Title;
 	uint    m_Style;
 	HWND	m_hwnd;
 
@@ -103,9 +107,10 @@ public:
 
 	void Render() override
 	{
-		m_Graphics->Render(nullptr);
+		//m_Graphics->Render(nullptr);
 	}
 
 private:
 	GraphicsClass *m_Graphics;  //Q: Why need to add myTD1NodeDLL as reference in myMain????
 };
+

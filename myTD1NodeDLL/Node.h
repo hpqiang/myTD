@@ -46,7 +46,7 @@ class Node : public INode
 {
 public:
 	Node()
-		: m_Content( *(IContent *)nullptr ) //??? which constructor is it using?
+		: m_Content( nullptr ) //??? which constructor is it using?
 	{
 	}
 	//Node(const Node& node) 
@@ -120,6 +120,6 @@ private:
 	INode*	m_NodeOut;
 	uint	m_NumOfNodeOut;
 
-	IContent& m_Content;
+	IContent* m_Content;
 };
 

@@ -4,6 +4,9 @@ using namespace std;
 
 #include "Node.h"
 #include "NodeWin.h"
+#include "NodeOP.h"
+#include "NodeOPD3D.h"
+
 #include "Content.h"
 #include "rootWindow.h"
 #include "TDSingleton.h"
@@ -17,7 +20,7 @@ public:
 	NodeManager() 
 	{ 
 		m_Nodes.clear();
-		cout << "In cstr, m_nodes size: " << m_Nodes.size() << endl;
+		//cout << "In cstr, m_nodes size: " << m_Nodes.size() << endl;
 	}
 	~NodeManager() //Prevent others to call it 
 	{
@@ -41,7 +44,7 @@ public:
 			return; 
 
 		list<INode *>::iterator it;
-		it = m_Nodes.begin();
+		//it = m_Nodes.begin();
 		////*NodeWinD3D *n = */(NodeWinD3D *)(*it)->Render();
 
 		for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
@@ -49,7 +52,7 @@ public:
 			//cout << "type_id(INode): " << typeid(*it).name() << endl;
 			//it->Render();
 			
-			dynamic_cast<NodeWinD3D *>(*it)->Render();
+			dynamic_cast<NodeWin *>(*it)->Render();
 		}
 	}
 
@@ -68,6 +71,7 @@ private:
 	mutex	m_Mutex;
 	condition_variable m_CondVar;
 
+	NodeManager* m_Composite;  //should support composite pattern?
 	//To do: Should process using graph???
 };
 
@@ -123,10 +127,7 @@ testcallback<int, string, uint, long> testCallBack[] =
 	{ "3", test3 }
 };
 
-
-
 //Q: Cannot be inside the TDManager class def? 
-
 
 //template<typename... Args>
 //struct myCommand_ActionList
@@ -168,9 +169,10 @@ public:
 
 	//Q: Why 1 or other number is necessary here? Why cannot be static?
 	/*static*/ TDManager::myCommand_Callback<int, void *, string, TDManager::myEvent> //, uint> 
-		Command_Callback[3] =
+		Command_Callback[4] =
 	{
 		{ "Create Node Win D3D", TDManager::createNodeWinD3D },
+		{ "Create Node OP D3D", TDManager::createNodeOPD3D },
 		// Another kind of events
 		{ "Prepare Draw Line", TDManager::prepareDrawLine},
 		{ "Draw Line", TDManager::DrawLineFromTo}
@@ -315,28 +317,56 @@ protected:
 		//}
 	}
 
-	static int createNodeWin(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	//static int createNodeWin(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	//{
+	//	//Q: Jesus, took me so long to find this! 
+	//	//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
+	//	TDManager* self = (TDManager *)this_Ptr;
+
+	//	//cout << __FUNCTION__ << endl;
+	//	//step1: create and display the node window
+	//	//NodeWin* nW = new NodeWin();
+	//	TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
+	//	NodeWin *nW = f->getInstance();
+
+	//	nW->createWindow(e.hwnd);
+	//	nW->createInputObject();
+	//	nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+
+	//	//delete nW;
+	//	//nW = nullptr;
+
+	//	//step2: add this node window to NodeManager
+	//	self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
+	//	self->m_NodeManager->addNode(nW);
+	//	//cout << self->m_NodeManager->getNodesSize() << endl;
+	//	return 1;
+	//}
+
+	template<class T>
+	int createNodeWin(HWND hwnd, const string& title)
 	{
-		//Q: Jesus, took me so long to find this! 
-		//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
-		TDManager* self = (TDManager *)this_Ptr;
+		////step1: create and display the node window
+		//TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
+		TDFactory<T> *f = new TDFactory<T>();
+		//NodeWinD3D *nWD3D = f->getInstance();
+		T* nW = f->getInstance();
 
-		//cout << __FUNCTION__ << endl;
-		//step1: create and display the node window
-		//NodeWin* nW = new NodeWin();
-		TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
-		NodeWin *nW = f->getInstance();
-
-		nW->createWindow(e.hwnd);
+		//nWD3D->createWindow(e.hwnd);
+		//nWD3D->createInputObject();
+		//nWD3D->createGraphicsObject();
+		//nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+		nW->createWindow(hwnd, title);
 		nW->createInputObject();
+		//nW->createGraphicsObject();
 		nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
 
-		//delete nW;
-		//nW = nullptr;
+							  //delete nW;
+							  //nW = nullptr;
 
 		//step2: add this node window to NodeManager
-		self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
-		self->m_NodeManager->addNode(nW);
+		m_NodeManager = TDSingleton<NodeManager>::getInstance();
+		m_NodeManager->addNode(nW);
 		//cout << self->m_NodeManager->getNodesSize() << endl;
 		return 1;
 	}
@@ -347,26 +377,38 @@ protected:
 		//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
 		TDManager* self = (TDManager *)this_Ptr;
 
-		//cout << __FUNCTION__ << endl;
-		//step1: create and display the node window
-		//NodeWin* nW = new NodeWin();
-		TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
-		NodeWinD3D *nWD3D = f->getInstance();
+		////cout << __FUNCTION__ << endl;
+		////step1: create and display the node window
+		////NodeWin* nW = new NodeWin();
+		self->createNodeWin<NodeWinD3D>(e.hwnd, "NodeWinD3D");
+		//TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
+		//NodeWinD3D *nWD3D = f->getInstance();
 
-		nWD3D->createWindow(e.hwnd);
-		nWD3D->createInputObject();
-		nWD3D->createGraphicsObject();
-		nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+		//nWD3D->createWindow(e.hwnd);
+		//nWD3D->createInputObject();
+		//nWD3D->createGraphicsObject();
+		//nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
 
-							  //delete nW;
-							  //nW = nullptr;
+		//					  //delete nW;
+		//					  //nW = nullptr;
 
-							  //step2: add this node window to NodeManager
-		self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
-		self->m_NodeManager->addNode(nWD3D);
-		//cout << self->m_NodeManager->getNodesSize() << endl;
+		////step2: add this node window to NodeManager
+		//self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
+		//self->m_NodeManager->addNode(nWD3D);
+		////cout << self->m_NodeManager->getNodesSize() << endl;
 		return 1;
 	}
+
+	static int createNodeOPD3D(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	{
+		cout << __FUNCTION__ << endl;
+		TDManager* self = (TDManager *)this_Ptr;
+
+		self->createNodeWin<NodeOPD3D>(e.hwnd, "NodeOPD3D");
+
+		return 1;
+	}
+	
 
 	static int prepareDrawLine(void * this_Ptr, string s, myEvent e)
 	{
@@ -490,11 +532,11 @@ protected:
 			POINT end;
 			//GetClientRect(From, &startRECT);
 			start.x = startRECT.right;
-			start.y = startRECT.top;
+			start.y = startRECT.top + (startRECT.bottom - startRECT.top) / 2;
 			//ClientToScreen(From, &start);
 			//GetClientRect(To, &endRECT);
 			end.x = endRECT.left;
-			end.y = endRECT.bottom;
+			end.y = endRECT.bottom - (endRECT.bottom - endRECT.top) / 2;
 			//ClientToScreen(To, &end);
 
 			cout << "Start: " << start.x << ": " << start.y << endl;
