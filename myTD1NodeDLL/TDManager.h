@@ -110,7 +110,7 @@ testcallback<int, string, uint, long> testCallBack[] =
 //
 //myCommand_ActionList<int> Command_ActionList[] =
 //{
-//	{"Create Node Win", &(TDManager::test)},
+//	{"Create Node Win D3D", &(TDManager::test)},
 //	{"", TDManager::noCommand}
 //};
 
@@ -139,10 +139,16 @@ public:
 		R (*func)(Args... args);
 	};
 
-	myCommand_Callback<int, void *, string, myEvent> Command_Callback[1] = //Q: Why 1 is necessary here?
+	//Q: Why 1 or other number is necessary here? Why cannot be static?
+	/*static*/ TDManager::myCommand_Callback<int, void *, string, TDManager::myEvent> //, uint> 
+		Command_Callback[3] =
 	{
-		{ "Create Node Win", TDManager::createNodeWin }//this->createNodeWin }
-											//{ "", test3 }
+		{ "Create Node Win D3D", TDManager::createNodeWinD3D },
+		// Another kind of events
+		{ "Prepare Draw Line", TDManager::prepareDrawLine},
+		{ "Draw Line", TDManager::DrawLineFromTo}
+
+													   
 	};
 
 
@@ -158,19 +164,21 @@ public:
 
 	void sendEvent(myEvent event)
 	{
-		std::lock_guard<mutex> lck(m_QueueMutex); // supposing RAII 
+		//Q: this lock has side effect when WM_SIZE in NodeWin is happening?
+		//std::lock_guard<mutex> lck(m_QueueMutex); // supposing RAII 
 
 		//cout << "received event: " << event.command.c_str() << endl;
 
 		m_Events.push(event);
+		
 	}
 	void processEvent()
 	{
 		std::lock_guard<mutex> lck(m_QueueMutex); //Q: What's wrong if using unique_lock?
 		//lck.lock();
 		myEvent e = m_Events.front(); //Q: if usiing myEvent&, then side effect????
-		//cout << "event:  " << e.event << " is poped" << endl;
-		//cout << "e.command is : " << e.command.c_str() << endl;
+		cout << "event:  " << e.event << " is poped" << endl;
+		cout << "e.command is : " << e.command.c_str() << endl;
 		m_Events.pop();
 		//lck.unlock();
 
@@ -245,7 +253,7 @@ public:
 	//Q: To do: registration pattern? refer to : http://stackoverflow.com/questions/1096700/instantiate-class-from-name
 	void processEachEvent(const myEvent& e)
 	{
-		//cout << "---------->Poping up e.command is : " << e.command.c_str() << endl;
+		cout << "---------->Poping up e.command is : " << e.command.c_str() << endl;
 		for (int i = 0; i < sizeof(Command_Callback) / sizeof(Command_Callback[0]); i++)
 		{
 			if (e.command == Command_Callback[i].command)
@@ -253,7 +261,7 @@ public:
 				int x = (*(Command_Callback[i].func))(this, "This is a test string", e);
 			}
 		}
-		//if (e.command == "Create Node Win")
+		//if (e.command == "Create Node Win D3D")
 		//{
 		//	//step1: create and display the node window
 		//	//NodeWin* nW = new NodeWin();
@@ -275,12 +283,13 @@ public:
 		//}
 	}
 
-	static int createNodeWin(void * this_Ptr, string s, myEvent e)
+	static int createNodeWin(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 	{
 		//Q: Jesus, took me so long to find this! 
+		//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
 		TDManager* self = (TDManager *)this_Ptr;
 
-		cout << __FUNCTION__ << endl;
+		//cout << __FUNCTION__ << endl;
 		//step1: create and display the node window
 		//NodeWin* nW = new NodeWin();
 		TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
@@ -296,7 +305,188 @@ public:
 		//step2: add this node window to NodeManager
 		self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
 		self->m_NodeManager->addNode(nW);
-		cout << self->m_NodeManager->getNodesSize() << endl;
+		//cout << self->m_NodeManager->getNodesSize() << endl;
+		return 1;
+	}
+
+	static int createNodeWinD3D(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	{
+		//Q: Jesus, took me so long to find this! 
+		//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
+		TDManager* self = (TDManager *)this_Ptr;
+
+		//cout << __FUNCTION__ << endl;
+		//step1: create and display the node window
+		//NodeWin* nW = new NodeWin();
+		TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
+		NodeWinD3D *nWD3D = f->getInstance();
+
+		nWD3D->createWindow(e.hwnd);
+		nWD3D->createInputObject();
+		nWD3D->createGraphicsObject();
+		nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+
+							  //delete nW;
+							  //nW = nullptr;
+
+							  //step2: add this node window to NodeManager
+		self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
+		self->m_NodeManager->addNode(nWD3D);
+		//cout << self->m_NodeManager->getNodesSize() << endl;
+		return 1;
+	}
+
+	static int prepareDrawLine(void * this_Ptr, string s, myEvent e)
+	{
+		cout << __FUNCTION__ << endl;
+		TDManager* self = (TDManager *)this_Ptr;
+		self->m_PrevEvent = e;
+
+		return 1;
+	}
+	static int DrawLineFromTo(void * this_Ptr, string s, myEvent e)
+	{
+		cout << __FUNCTION__ << endl;
+		TDManager* self = (TDManager *)this_Ptr;
+
+		//Q: Temp
+		if (self->m_PrevEvent.hwnd == e.hwnd)
+		{
+			cout << "Why same hwnd goes here???" << endl;
+			//return -1;
+		}
+
+		if (!self->existFromTo(self->m_PrevEvent,e))
+		{
+			if (self->m_PrevEvent.hwnd != e.hwnd)  //REally temp here???
+			{
+				cout << "Adding to pair for: " << self->m_PrevEvent.hwnd <<
+					"and : " << e.hwnd;
+				//Save necessary information to m_Connections
+				std::pair<myEvent, myEvent> myPair;
+				myPair = std::make_pair(self->m_PrevEvent, e);
+				self->m_Connections.push_back(myPair);
+			}
+		}
+		self->DrawConnections();
+
+		//self->m_PrevEvent = *(myEvent *)nullptr;
+
+		return 1;
+	}
+
+	bool existFromTo(myEvent prevEvent, myEvent e)
+	{
+		list<pair<myEvent, myEvent>>::iterator it;
+		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
+		{
+			if (it->first.hwnd == prevEvent.hwnd && it->second.hwnd == e.hwnd)
+				return true;
+		}
+		return false;
+	}
+
+	int DrawConnections()
+	{
+		cout << __FUNCTION__ << endl;
+		list<std::pair<myEvent, myEvent>>::iterator it;
+		cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
+		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
+		{
+			std::pair<myEvent, myEvent> myPair;
+			myPair = *it;
+
+			//DrawLine(myPair.first.hwnd, myPair.second.hwnd);
+			DrawLine(myPair.first, myPair.second);
+		}
+		return 1;
+	}
+
+	int DrawLine(myEvent prevEvent, myEvent curEvent)
+	{
+		cout << __FUNCTION__ << endl;
+		DrawLine(prevEvent.hwnd, curEvent.hwnd);
+		return 1;
+	}
+	int DrawLine(HWND From, HWND To)
+	{
+		cout << __FUNCTION__ << endl;
+		RECT startRECT;
+		RECT endRECT;
+		HDC hdc;
+		HGDIOBJ original = NULL;
+
+		cout << "From HWND: " << From << endl;
+		cout << "To HWND: " << To << endl;
+
+		if (To == From)
+		{
+			cout << "Waring: same from and to!!!!!" << endl;
+			return -1;
+		}
+
+		if (To != nullptr)
+		{
+			static POINT prevFrom, prevTo;
+
+			HWND parentHwnd = GetParent(To);
+			RECT parentClientRect;
+			GetClientRect(parentHwnd, &parentClientRect);
+			//InvalidateRect(parentHwnd, &parentClientRect, false);
+			//ShowWindow(parentHwnd, SW_SHOW);
+			//RedrawWindow(parentHwnd, &parentClientRect, NULL, RDW_UPDATENOW); // RDW_INVALIDATE); // | RDW_ERASE);
+
+			hdc = GetDC(GetParent(To));
+
+			//SelectObject(hdc, GetStockObject(DC_PEN));
+			//SetDCPenColor(hdc, RGB(255, 0, 0));
+
+			GetWindowRect(From, &startRECT);
+			cout << " startRECT: " << startRECT.right <<
+				": " << startRECT.top << endl;
+			//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
+			MapWindowPoints(HWND_DESKTOP, GetParent(From), (LPPOINT)&startRECT, 2);
+			GetWindowRect(To, &endRECT);
+			cout << "                end RECT: " << endRECT.left <<
+				": " << endRECT.bottom << endl;
+			MapWindowPoints(HWND_DESKTOP, GetParent(To), (LPPOINT)&endRECT, 2);
+
+			////HPQ: refer to http://winapi.freetechsecrets.com/win32/WIN32Drawing_Lines_with_the_Mouse.htm
+			SetROP2(hdc, R2_NOTXORPEN);
+			
+			POINT start;
+			POINT end;
+			//GetClientRect(From, &startRECT);
+			start.x = startRECT.right;
+			start.y = startRECT.top;
+			//ClientToScreen(From, &start);
+			//GetClientRect(To, &endRECT);
+			end.x = endRECT.left;
+			end.y = endRECT.bottom;
+			//ClientToScreen(To, &end);
+
+			cout << "Start: " << start.x << ": " << start.y << endl;
+			cout << "End: " << end.x << ": " << end.y << endl;
+
+
+			//if (bPrevLine) {
+				MoveToEx(hdc, prevFrom.x, prevFrom.y,
+					(LPPOINT)NULL);
+				LineTo(hdc, prevTo.x, prevTo.y);
+			//}
+
+			//SelectObject(hdc, GetStockObject(DC_PEN));
+			//SetDCPenColor(hdc, RGB(255, 0, 0));
+
+			MoveToEx(hdc, start.x, start.y, NULL);
+			LineTo(hdc, end.x, end.y);
+
+			prevFrom.x = start.x;
+			prevFrom.y = start.y;
+			prevTo.x = end.x;
+			prevTo.y = end.y;
+			//bPrevLine = true;
+		}
 		return 1;
 	}
 
@@ -306,6 +496,10 @@ private:
 	map<INode*, IContent*> m_Node_Contents; //One to One only?
 	mutex	m_Mutex;
 	condition_variable m_CondVar;
+
+	list<std::pair<myEvent, myEvent>> m_Connections;
+	mutex	m_MutexConnection;
+	myEvent		m_PrevEvent;
 
 	queue<myEvent>  m_Events;
 	mutex	m_QueueMutex;

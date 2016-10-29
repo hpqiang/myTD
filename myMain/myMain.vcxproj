@@ -69,8 +69,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\myTD1NodeDLL;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)myTD1NodeDLL;$(SolutionDir)myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Debug;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -121,6 +121,9 @@
     <ClCompile Include="tabWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\myTD1D3D11DLL\myTD1D3D11DLL.vcxproj">
+      <Project>{8be83c28-ebef-48c9-98e5-ef008275793e}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\myTD1NodeDLL\myTD1NodeDLL.vcxproj">
       <Project>{9df8d041-8ecb-4ea5-8d35-1d5c9919061f}</Project>
     </ProjectReference>

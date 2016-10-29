@@ -16,6 +16,7 @@ using namespace std;
 #include "CommonDefs.h"
 #include "Content.h"
 #include "inputclass.h"
+//#include "graphicsclass.h"
 
 class INode
 {

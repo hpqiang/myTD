@@ -68,7 +68,7 @@ Menu popUpMenu[] =
 MenuItem popUpMenuItem[] =
 {
 	{ 101, 201, "&2D Win","" },
-	{ 101, 202, "&D3D Win","Create Node Win" },
+	{ 101, 202, "&D3D Win","Create Node Win D3D" },
 	{ 101, 203, "&OGL Win","" },
 	{ 101, 204, "&Audio Win","" },
 	{ 101, 205, "&Video Win","" },
@@ -184,7 +184,7 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 						e.wparam = wparam;
 						e.lparam = lparam;
 						td_Manager = TDSingleton<TDManager>::getInstance();
-						for (int i = 0; i < 10; i++)  //Hehe: testing
+						for (int i = 0; i < 2; i++)  //Hehe: testing
 							td_Manager->sendEvent(e);
 					}
 				}
