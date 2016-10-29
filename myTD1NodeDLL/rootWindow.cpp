@@ -563,6 +563,7 @@ void RootWindow::run()
 		else
 		{
 			// Otherwise do the frame processing.
+			td_Manager->Render();
 //			result = Frame();
 			//if (!result)
 			//{

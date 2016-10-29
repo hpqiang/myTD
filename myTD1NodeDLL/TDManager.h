@@ -14,8 +14,16 @@ using namespace std;
 class NodeManager
 {
 public:
-	NodeManager() {}
-	~NodeManager() {} //Prevent others to call it
+	NodeManager() 
+	{ 
+		m_Nodes.clear();
+		cout << "In cstr, m_nodes size: " << m_Nodes.size() << endl;
+	}
+	~NodeManager() //Prevent others to call it 
+	{
+		// to do: more processing
+		m_Nodes.clear();
+	} 
 					  // to do : add CRUD for Node handling
 	void addNode(INode* node)
 	{
@@ -24,6 +32,25 @@ public:
 	uint getNodesSize()
 	{
 		return m_Nodes.size();
+	}
+
+	void Render()
+	{
+		//cout << __FUNCTION__ << endl;
+		if (m_Nodes.empty())
+			return; 
+
+		list<INode *>::iterator it;
+		it = m_Nodes.begin();
+		////*NodeWinD3D *n = */(NodeWinD3D *)(*it)->Render();
+
+		for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+		{
+			//cout << "type_id(INode): " << typeid(*it).name() << endl;
+			//it->Render();
+			
+			dynamic_cast<NodeWinD3D *>(*it)->Render();
+		}
 	}
 
 protected:
@@ -162,6 +189,11 @@ public:
 		return m_RootWindow;
 	}
 
+	void Render()
+	{
+		m_NodeManager->Render();
+	}
+
 	void sendEvent(myEvent event)
 	{
 		//Q: this lock has side effect when WM_SIZE in NodeWin is happening?
@@ -249,7 +281,7 @@ protected:
 	//	return e.event;
 	//}
 
-public:
+//public:
 	//Q: To do: registration pattern? refer to : http://stackoverflow.com/questions/1096700/instantiate-class-from-name
 	void processEachEvent(const myEvent& e)
 	{

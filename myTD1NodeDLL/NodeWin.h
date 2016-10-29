@@ -101,6 +101,11 @@ public:
 		}
 	}
 
+	void Render() override
+	{
+		m_Graphics->Render(nullptr);
+	}
+
 private:
 	GraphicsClass *m_Graphics;  //Q: Why need to add myTD1NodeDLL as reference in myMain????
 };

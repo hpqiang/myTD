@@ -8,6 +8,8 @@ TDManager::TDManager()
 	, m_RootWindow(nullptr)//m_hinst(nullptr), m_hwnd(nullptr)
 {
 	m_Node_Contents.clear();
+	m_NodeManager = TDSingleton<NodeManager>::getInstance();
+	m_ContentManager = TDSingleton<ContentManager>::getInstance();
 }
 
 TDManager::~TDManager()
