@@ -26,13 +26,13 @@ NodeMenu NodePopUpMenu[] =
 
 NodeMenuItem NodePopUpMenuItem[] =
 {
-	{ 301, 401, "&Load Texture","Load Texture" },
-	{ 301, 402, "&Load Shader","Load Shader" },
-	{ 301, 403, "&Geometry","Geometry" },
+	{ 301, 401, "&Load D3D Texture","D3D Load Texture" },
+	{ 301, 402, "&Load D3D Shader","D3D Load Shader" },
+	{ 301, 403, "&D3D Geometry","D3D Geometry" },
 
-	{ 302, 501, "&Load Texture","Load Texture" },
-	{ 302, 502, "&Load Shader","Load Shader" },
-	{ 302, 503, "&Geometry","Geometry" },
+	{ 302, 501, "&Load OGL Texture","OGL Load Texture" },
+	{ 302, 502, "&Load OGL Shader","OGL Load Shader" },
+	{ 302, 503, "&OGL Geometry","OGL Geometry" },
 };
 
 class __declspec(dllexport) NodeWin :public Node

@@ -12,6 +12,8 @@ using namespace std;
 #include "TDSingleton.h"
 #include "TDFactory.h"
 
+#include "PropertyWin.h"
+
 #include <thread>
 
 class NodeManager
@@ -169,10 +171,15 @@ public:
 
 	//Q: Why 1 or other number is necessary here? Why cannot be static?
 	/*static*/ TDManager::myCommand_Callback<int, void *, string, TDManager::myEvent> //, uint> 
-		Command_Callback[4] =
+		Command_Callback[5] =
 	{
 		{ "Create Node Win D3D", TDManager::createNodeWinD3D },
 		{ "Create Node OP D3D", TDManager::createNodeOPD3D },
+
+		//Another kind of events
+		{ "D3D Geometry", TDManager::createPropertyWinD3DGeometry },
+
+
 		// Another kind of events
 		{ "Prepare Draw Line", TDManager::prepareDrawLine},
 		{ "Draw Line", TDManager::DrawLineFromTo}
@@ -364,10 +371,24 @@ protected:
 							  //delete nW;
 							  //nW = nullptr;
 
-		//step2: add this node window to NodeManager
+							  //step2: add this node window to NodeManager
 		m_NodeManager = TDSingleton<NodeManager>::getInstance();
 		m_NodeManager->addNode(nW);
 		//cout << self->m_NodeManager->getNodesSize() << endl;
+		return 1;
+	}
+
+	template<class T>
+	int createPropertyWin(HWND parentHwnd, HWND sourceNodeHwnd, const string& title)
+	{
+		cout << __FUNCTION__ << endl;
+
+		TDFactory<T> *f = new TDFactory<T>();
+		T* pW = f->getInstance();
+
+		pW->createWindow(parentHwnd, sourceNodeHwnd, title);
+		pW->displayWindow();
+
 		return 1;
 	}
 
@@ -405,6 +426,25 @@ protected:
 		TDManager* self = (TDManager *)this_Ptr;
 
 		self->createNodeWin<NodeOPD3D>(e.hwnd, "NodeOPD3D");
+
+		return 1;
+	}
+	
+	static int createPropertyWinD3DGeometry(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	{
+		TDManager* self = (TDManager *)this_Ptr;
+		//Q: Why rW is nullptr below????
+		//RootWindow* rW = self->getRootWindow();
+		//if (rW == nullptr)
+		//{
+		//	cout << "What? RootWindow pointer null????" << endl;
+		//	return -1;
+		//}
+		//HWND parentHwnd = rW->getHwnd();
+		//Q: Temp walkaround....
+		HWND parentHwnd = GetParent(e.hwnd);
+
+		self->createPropertyWin<PropertyWinD3DGeometry>(parentHwnd, e.hwnd, "D3DGeometry");
 
 		return 1;
 	}

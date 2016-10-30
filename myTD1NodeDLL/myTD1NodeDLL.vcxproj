@@ -95,6 +95,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/FORCE:MULTIPLE</AdditionalOptions>
+      <AdditionalDependencies>Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -158,6 +159,7 @@
     <ClInclude Include="NodeWin.h" />
     <ClInclude Include="NodeOPOGL.h" />
     <ClInclude Include="NodeOP.h" />
+    <ClInclude Include="PropertyWin.h" />
     <ClInclude Include="rootWindow.h" />
     <ClInclude Include="TDFactory.h" />
     <ClInclude Include="TDManager.h" />
@@ -167,6 +169,7 @@
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="NodeWin.cpp" />
+    <ClCompile Include="PropertyWin.cpp" />
     <ClCompile Include="rootWindow.cpp" />
     <ClCompile Include="TDManager.cpp" />
   </ItemGroup>

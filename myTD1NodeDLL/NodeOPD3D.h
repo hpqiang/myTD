@@ -1,6 +1,6 @@
 #pragma once
 #include "NodeOP.h"
-
+//#include "PropertyWin.h"
 //#include <D3DX10math.h>
 
 struct myRotation
@@ -76,25 +76,12 @@ private:
 	//PTextureOP	m_OP3DTexture;
 };
 
-class PropertyWin : public NodeWin //Temp: Should not derived from NodeWin?
-{
-
-};
-
-class PropertyWinD3DGeometry : public PropertyWin
-{
-public:
-
-private:
-
-};
-
 class NodeOPD3DGeometry : public NodeOPD3D
 {
 public:
 private:
 	PGeometryOP m_OP3DGeometry;
-	PropertyWinD3DGeometry* m_PropertyWin;
+	//PropertyWinD3DGeometry* m_PropertyWin;
 };
 
 class NodeOPD3DLight : public NodeOPD3D

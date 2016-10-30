@@ -46,6 +46,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 	static HWND prevH = nullptr; // , curH = nullptr;
 	static TDManager::myEvent prevEvent, curEvent;
 	TDManager* td_Manager = nullptr;
+	TDManager::myEvent e;
 
 	switch (umsg)
 	{
@@ -181,6 +182,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 	case WM_COMMAND:
 	{
+		//step1: create if not exist(?) corresponding property window
 		//for (int i = 0; i < sizeof(popUpMenu) / sizeof(popUpMenu[0]); i++)
 		{
 			for (int j = 0; j < sizeof(NodePopUpMenuItem) / sizeof(NodePopUpMenuItem[0]); j++)
@@ -189,17 +191,29 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 				{
 					cout << "This: " << LOWORD(wparam) << " is clicked..." << endl;
 					cout << "POPUP: **********with command: " << NodePopUpMenuItem[j].command.c_str() << endl;
-					//e.event = popUpMenuItem[j].id;//To do: Should translate msgs like this?
-					//e.hwnd = hwnd;
-					//e.command = popUpMenuItem[j].command;
-					//e.wparam = wparam;
-					//e.lparam = lparam;
-					//td_Manager = TDSingleton<TDManager>::getInstance();
+					cout << "And HWND: " << hwnd << endl;
+					e.event = NodePopUpMenuItem[j].id;//To do: Should translate msgs like this?
+					e.hwnd = hwnd;
+					e.command = NodePopUpMenuItem[j].command;
+					e.wparam = wparam;
+					e.lparam = lparam;
+					td_Manager = TDSingleton<TDManager>::getInstance();
 					//for (int i = 0; i < 2; i++)  //Hehe: testing
-					//	td_Manager->sendEvent(e);
+						td_Manager->sendEvent(e);
 				}
 			}
 		}
+		//step2: decide corresponding content in the client area
+		//		 e.g., D3D geometry content???
+
+
+
+		break;
+	}
+	//case 1000:
+	case WM_NOTIFY:
+	{
+		cout << "!!!!!!!!!!!!!received pos: " << lparam << endl;
 		break;
 	}
 	}

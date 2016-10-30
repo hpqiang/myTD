@@ -60,6 +60,9 @@
     <ClInclude Include="NodeOP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PropertyWin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Node.cpp">
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NodeWin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyWin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
