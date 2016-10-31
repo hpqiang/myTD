@@ -7,6 +7,7 @@ bool NodeWin::m_isInitialized = false;
 string NodeWin::m_ClassName = "nodeWinClass";
 //string NodeWin::m_Title = "nodeWin";
 
+
 //To do: should use the one in rootWindow.cpp????
 void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
 {
@@ -90,12 +91,14 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		prevEvent = {};
 		//prevH = nullptr;
 
-		return 0;
+		//return 0;
+		break;
 	}
 	case WM_SIZE:
 	{
 		//cout << "sizing..." << endl;
-		return 0;
+		//return 0;
+		break;
 	}
 	case WM_LBUTTONDOWN:
 	{
@@ -108,7 +111,8 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		prevEvent.wparam = wparam;
 		prevEvent.lparam = lparam;
 
-		return 0;
+		//return 0;
+		break;
 	}
 	case WM_LBUTTONUP:
 	{
@@ -143,7 +147,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		td_Manager->sendEvent(prevEvent);
 		td_Manager->sendEvent(curEvent);
 
-		prevEvent = {};
+		prevEvent = {}; //Q: Not necessary since both prevEvent and curEvent had been consumed???
 		curEvent = {};
 		//prevH = nullptr;
 
@@ -171,7 +175,8 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 		//SendMessage(GetParent(curH), USER_1, 0, 0);
 
-		return 0;
+		//return 0;
+		break;
 	}
 	case WM_RBUTTONUP:
 	{
@@ -213,7 +218,10 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 	//case 1000:
 	case WM_NOTIFY:
 	{
-		cout << "!!!!!!!!!!!!!received pos: " << lparam << endl;
+		//cout << "!!!!!!!!!!!!!received pos: " << lparam << endl;
+
+		m_Rotation = lparam;  //Temp testing
+
 		break;
 	}
 	}
@@ -318,8 +326,8 @@ int NodeWin::createWindow(HWND parentHwnd, const string& title)
 	return TRUE;
 }
 
-#include <iostream>
-using namespace std;
+//#include <iostream>
+//using namespace std;
 
 bool NodeWin::displayWindow()
 {

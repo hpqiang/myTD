@@ -66,9 +66,20 @@ private:
 }*PTextureOP;
 //To do: More 3D effect: cubemap, environment mapp, shadow, smoke, water...
 
-class NodeOPD3D :public NodeOP
+class NodeOPD3D :public NodeOP  
 {
 public:
+	bool createGraphicsObject()
+	{
+		//bool result;
+		return true; //Q: Temp
+	}
+
+	virtual void Render(int rot) override
+	{
+		return;
+	}
+
 private:
 	//PGeometryOP m_OP3DGeometry;
 	//PLightOP	m_OP3DLight;

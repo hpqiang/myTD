@@ -41,7 +41,8 @@ public:
 	void Shutdown();
 	bool Frame(int,int);
 
-	bool Render(Ops* op);
+	//	bool Render(Ops* op);
+	bool Render(int rot);
 
 private:
 	D3DClass* m_D3D;

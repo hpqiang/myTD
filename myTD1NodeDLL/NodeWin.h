@@ -38,7 +38,8 @@ NodeMenuItem NodePopUpMenuItem[] =
 class __declspec(dllexport) NodeWin :public Node
 {
 public:
-	//To do: How to deal with WndProc?
+	static uint m_Rotation;  //Temp testing
+							 //To do: How to deal with WndProc?
 	NodeWin();
 	virtual ~NodeWin();
 
@@ -55,8 +56,10 @@ public:
 	bool createInputObject();
 	//bool createGraphicsObject();
 
-	virtual void Render() override
-	{}
+	virtual void Render(int rot) = 0; // override
+	//{
+	//	cout << "Node**********rot : " << rot << endl;
+	//}
 	//bool Frame();
 
 protected:
@@ -78,10 +81,13 @@ protected:
 
 	InputClass* m_Input;
 };
+uint NodeWin::m_Rotation = 0;
 
 class __declspec(dllexport) NodeWinD3D :public NodeWin
 {
 public:
+	static uint m_Rotation;  //Temp testing
+
 	NodeWinD3D() {}
 	~NodeWinD3D() {}
 
@@ -105,12 +111,16 @@ public:
 		}
 	}
 
-	void Render() override
+	virtual void Render(int rot) override
 	{
-		//m_Graphics->Render(nullptr);
+		cout << "D3D**********rot : " << rot << endl;
+
+		m_Graphics->Render(rot);
 	}
 
 private:
 	GraphicsClass *m_Graphics;  //Q: Why need to add myTD1NodeDLL as reference in myMain????
 };
+
+uint NodeWinD3D::m_Rotation = 0;
 

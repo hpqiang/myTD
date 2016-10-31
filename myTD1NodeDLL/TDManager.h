@@ -39,7 +39,41 @@ public:
 		return m_Nodes.size();
 	}
 
-	void Render()
+	NodeWin* findNodeAt(int idx)
+	{
+		list<INode *>::iterator it;
+		int i = 0;
+
+		for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+		{
+			if (i == idx)
+			{
+				NodeWin* node = dynamic_cast<NodeWin *>(*it);
+				return node;
+			}
+			else
+				i++;
+		}
+		cout << "Did not find the INode* with idx" << endl;
+		return nullptr;
+	}
+
+	NodeWin* getObjectByHwnd(HWND hwnd)
+	{
+		list<INode *>::iterator it;
+		for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+		{
+			NodeWin *node = dynamic_cast<NodeWin *>(*it);
+			if ( node->getNodeWinHandle() == hwnd )
+			{
+				return node;
+			}
+		}
+		cout << "Did not find the Inode with hwnd" << endl;
+		return nullptr;
+	}
+
+	void Render(int rot)
 	{
 		//cout << __FUNCTION__ << endl;
 		if (m_Nodes.empty())
@@ -54,7 +88,7 @@ public:
 			//cout << "type_id(INode): " << typeid(*it).name() << endl;
 			//it->Render();
 			
-			dynamic_cast<NodeWin *>(*it)->Render();
+			dynamic_cast<NodeWin *>(*it)->Render(rot);
 		}
 	}
 
@@ -200,7 +234,56 @@ public:
 
 	void Render()
 	{
-		m_NodeManager->Render();
+		list<std::pair<myEvent, myEvent>>::iterator it;
+		it = m_Connections.begin();
+		int rot = 0;
+		static int i = 1;
+
+		if (m_Connections.size() > 0)
+		{
+			for (; it != m_Connections.end(); it++)
+			{
+				for (int i = 0; i < m_NodeManager->getNodesSize(); i++)
+				{
+					//cout << "finding at: " << i << endl;
+					NodeWin* node = m_NodeManager->findNodeAt(i);
+					//NodeWin * node = dynamic_cast<NodeWin *>(inode);
+					HWND h = node->getNodeWinHandle();
+					if (h == nullptr)
+					{
+						cout << "Node handle is nullptr????" << endl;
+						continue;
+					}
+					else
+					{
+						//cout << "h != nullptr " << endl;
+						if (node->getNodeWinHandle() == it->second.hwnd)
+						{
+							NodeWin *nW = m_NodeManager->getObjectByHwnd(it->first.hwnd);
+							rot = nW->m_Rotation;
+							//cout << "**********rot : " << rot <<
+								//"\t" << "typeid name is : " << typeid(nW).name() << 
+								//endl;
+							//if (typeid(nW).name() == "NodeWinD3D *")
+							{
+								//dynamic_cast<NodeWinD3D *>(nW)->Render(rot);
+								//nW->Render(rot);
+							}
+							//return;
+						}
+						else
+							cout << "Not find" << endl;
+					}
+				}
+			}
+		}
+		//cout << "i = " << i << endl;
+		m_NodeManager->Render(rot);
+		//i++;
+		//if (i > 10)
+		//{
+		//	i = 0;
+		//}
 	}
 
 	void sendEvent(myEvent event)
@@ -365,7 +448,10 @@ protected:
 		//nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
 		nW->createWindow(hwnd, title);
 		nW->createInputObject();
-		//nW->createGraphicsObject();
+
+		//if (typeid(nW).name() == "NodeWinD3D *")
+		nW->createGraphicsObject(); //Q: Temp: for NodeWinD3D it's valid
+
 		nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
 
 							  //delete nW;
@@ -392,6 +478,7 @@ protected:
 		return 1;
 	}
 
+	//Q: Temp: Take this NodeWinD3D as NodeWinD3DGeometry for now 
 	static int createNodeWinD3D(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 	{
 		//Q: Jesus, took me so long to find this! 
@@ -401,7 +488,7 @@ protected:
 		////cout << __FUNCTION__ << endl;
 		////step1: create and display the node window
 		////NodeWin* nW = new NodeWin();
-		self->createNodeWin<NodeWinD3D>(e.hwnd, "NodeWinD3D");
+		self->createNodeWin<NodeWinD3D>(e.hwnd, "NodeWinD3DGeometry");
 		//TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
 		//NodeWinD3D *nWD3D = f->getInstance();
 
@@ -444,7 +531,7 @@ protected:
 		//Q: Temp walkaround....
 		HWND parentHwnd = GetParent(e.hwnd);
 
-		self->createPropertyWin<PropertyWinD3DGeometry>(parentHwnd, e.hwnd, "D3DGeometry");
+		self->createPropertyWin<PropertyWinD3DOPGeometry>(parentHwnd, e.hwnd, "D3DGeometry");
 
 		return 1;
 	}
@@ -611,7 +698,7 @@ private:
 	mutex	m_Mutex;
 	condition_variable m_CondVar;
 
-	list<std::pair<myEvent, myEvent>> m_Connections;
+	list<std::pair<myEvent, myEvent>> m_Connections; //Q: Also serve as a mediator???
 	mutex	m_MutexConnection;
 	myEvent		m_PrevEvent;
 

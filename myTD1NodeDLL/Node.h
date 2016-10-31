@@ -37,7 +37,7 @@ class INode
 	virtual bool	ConnectFrom(const INode& nodeIn) = 0;
 	virtual bool	ConnectTo(const INode& nodeOut) = 0;
 
-	virtual void    Render() = 0;
+	//virtual void    Render(int rot) = 0;
 	//Q: Interface needs destructor???
 	//virtual ~INode() = 0;
 };
@@ -109,10 +109,10 @@ public:
 		return true;
 	}
 
-	virtual void    Render()
-	{
-		return;
-	}
+	//virtual void    Render(int rot) override
+	//{
+	//	return;
+	//}
 
 private:
 	INode*  m_NodeIn; //Q: Can use INode& here?

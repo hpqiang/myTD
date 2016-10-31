@@ -2,10 +2,18 @@
 
 //#include <CommCtrl.h>
 #include "NodeWin.h"
+#include "NodeOPD3D.h"
+
+//#pragma comment(lib, "CommCtl32.dll")
+
+//class IPropertyWin
+//{
+//	virtual static void CreateControls(HWND hwnd) = 0;
+//
+//};
 
 class __declspec(dllexport) PropertyWin// : public NodeWin //Temp: Should not derived from NodeWin?
 {
-	//INITCOMMONCONTROLSEX icex;
 public:
 	//To do: How to deal with WndProc?
 	PropertyWin();
@@ -17,10 +25,12 @@ public:
 	}
 
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-	static void CreateControls(HWND hwnd);
-	static void UpdateLabel();
+	virtual int DerivedWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) = 0;
+//	/*static*/ void CreateControls(HWND hwnd);
+//	/*static*/ void UpdateLabel();
 
-	int createWindow(HWND, HWND, const string& title);
+	int baseCreateWindow(HWND parentHwnd, /*HWND sourceNodeHwnd, */const string& title);
+	//virtual int createWindow(HWND parentHwnd, HWND sourceNodeHwnd, const string& title) = 0;
 	bool displayWindow();
 
 protected:
@@ -38,10 +48,22 @@ protected:
 
 };
 
-class PropertyWinD3DGeometry : public PropertyWin
+class __declspec(dllexport) PropertyWinD3DOPGeometry : public PropertyWin
 {
 public:
+	PropertyWinD3DOPGeometry();
+	~PropertyWinD3DOPGeometry();
+
+	int createWindow(HWND parentHwnd, HWND sourceNodeHwnd, const string& title); // override;
+	
+	virtual int DerivedWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) override;
+	
+	void CreateControls(HWND hwnd);
+	
+	void UpdateLabel();
 
 private:
-
+	PGeometryOP m_OP3DGeometry;
+	//HWND *m_Track; // [10];
+	HWND m_Track[sizeof(GeometryOP) / sizeof(float)];
 };

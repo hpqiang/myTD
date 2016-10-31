@@ -166,7 +166,8 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	//return true;
 
 	// Render the graphics scene.
-	result = Render(nullptr);
+	//	result = Render(nullptr);
+	result = Render(0);
 	if (!result)
 	{
 		return false;
@@ -175,7 +176,8 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	return true;
 }
 
-bool GraphicsClass::Render(Ops* op)
+//bool GraphicsClass::Render(Ops* op)
+bool GraphicsClass::Render(int rot)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
 	bool result;
@@ -202,29 +204,30 @@ bool GraphicsClass::Render(Ops* op)
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 	m_D3D->GetWorldMatrix(worldMatrix);
 
-	if (op != nullptr)
+//	if (op != nullptr)
 	{
 //		opRotation += op->getRotation();
 		//prevRotation += opRotation;
 	/*else
 		rotation += 0.0005f;*/
 
-	rotation += opRotation;
+	//rotation += opRotation;
+		rotation += (float)rot / 10;
 	//rotation += prevOpRotation;
 	//cout << "op: " << op << '\t';
 	//cout << "opRotation--->" << opRotation << endl;
-	//cout << "rotation--->" << rotation << endl;
+//	cout << "rotation--->" << rotation << endl;
 
 	D3DXMatrixRotationY(&worldMatrix, rotation);
 	prevOpRotation += rotation;
 	//D3DXMatrixRotationY(&worldMatrix, opRotation);
 	}
-	else
-	{
-		rotation += 0.05f; 
-		noOpRotation += rotation;
-			D3DXMatrixRotationY(&worldMatrix, noOpRotation);
-	}
+	//else
+	//{
+	//	//rotation += 0.05f; 
+	//	//noOpRotation += rotation;
+	//	//	D3DXMatrixRotationY(&worldMatrix, noOpRotation);
+	//}
 	if (rotation > (90.0f / (float)D3DX_PI))
 	{
 		rotation = 0; // -= 180.0f / ((float)D3DX_PI);
