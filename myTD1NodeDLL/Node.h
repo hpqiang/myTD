@@ -42,7 +42,7 @@ class INode
 	//virtual ~INode() = 0;
 };
 
-class Node : public INode
+class __declspec(dllexport) Node : public INode
 {
 public:
 	Node()

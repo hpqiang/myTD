@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: graphicsclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
-#include "nodeWindow.h"
+//#include "nodeWindow.h"
 
 #include "graphicsclass.h"
 
@@ -176,7 +176,57 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	return true;
 }
 
-//bool GraphicsClass::Render(Ops* op)
+//To do: add more parameters
+//Q: Cannot pass in myD3DConnectionOP since it's a different dll?
+bool GraphicsClass::Render(float rotX, float rotY, float rotZ,
+	float tX, float tY, float tZ,
+	float sX, float sY, float sZ)
+{
+	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
+	bool result;
+	static float blue = 1.0f;
+	//float rotation = 0.0f;
+
+	// Clear the buffers to begin the scene.
+	m_D3D->BeginScene(0.0f, 0.0f, blue, 0.5f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Get the view, projection, and world matrices from the camera and d3d objects.
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_D3D->GetProjectionMatrix(projectionMatrix);
+	m_D3D->GetWorldMatrix(worldMatrix);
+
+	//D3DXMatrixRotationY(&worldMatrix, rotation);
+	//float rotX = op->myGeometryOP->getRotation().m_Rx;
+	//To do: add more operations
+	//cout << "rotX : " << rotX << "Y: " << rotY << "Z: " << rotZ << endl;
+	D3DXMatrixRotationX(&worldMatrix, rotX);
+	//D3DXMatrixRotationY(&worldMatrix, rotY);
+	//D3DXMatrixRotationZ(&worldMatrix, rotZ);
+
+	//if (rotation > (90.0f / (float)D3DX_PI))
+	//{
+	//	rotation = 0; // -= 180.0f / ((float)D3DX_PI);
+	//}
+
+	m_Model->Render(m_D3D->GetDeviceContext());
+
+	// Render the model using the texture shader.
+	result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+		m_Model->GetTexture());
+	if (!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D->EndScene();
+
+	return true;
+}
+
 bool GraphicsClass::Render(int rot)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;

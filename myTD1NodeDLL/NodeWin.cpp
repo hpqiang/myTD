@@ -220,7 +220,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 	{
 		//cout << "!!!!!!!!!!!!!received pos: " << lparam << endl;
 
-		m_Rotation = lparam;  //Temp testing
+//		m_Rotation = lparam;  //Temp testing
 
 		break;
 	}
@@ -352,4 +352,30 @@ bool NodeWin::createInputObject()
 
 	// Initialize the input object.
 	//m_Input->Initialize();
+	return true;
+}
+
+
+//To do: This function should be in NodeWinD3DGeometry and other derived classes
+void NodeWinD3D::getD3DConnectionOP(myD3DConnectionOP *op)
+{
+	TDManager* tM = TDSingleton<TDManager>::getInstance();
+	NodeManager* nM = tM->getNodeManager();
+	NodeWin*	nW = nullptr;
+	//step1: find all From windows connected to this window
+	HWND *hwndFrom = new HWND[3]; //temp: Assuming no more than 3 connections
+	int foundNum = 0;
+
+	if (tM->findFrom(m_hwnd, hwndFrom, &foundNum) != false)
+	{
+		//cout << "found From number is: " << foundNum << endl;
+		//step2: find the node window associate with hwndFrom
+
+		for (int i = 0; i < foundNum; i++)
+		{
+			nW = nM->getObjectByHwnd(hwndFrom[i]);
+			//Temp: call NodeOPD3D's method directly, should eliminate dynamic cast
+			dynamic_cast<NodeOPD3D *>(nW)->getD3DConnectionOP(m_D3DConnectionOP);
+		}
+	}
 }

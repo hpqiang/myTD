@@ -1,10 +1,7 @@
 #pragma once
 
-//#include <CommCtrl.h>
 #include "NodeWin.h"
 #include "NodeOPD3D.h"
-
-//#pragma comment(lib, "CommCtl32.dll")
 
 //class IPropertyWin
 //{
@@ -12,10 +9,9 @@
 //
 //};
 
-class __declspec(dllexport) PropertyWin// : public NodeWin //Temp: Should not derived from NodeWin?
+class __declspec(dllexport) PropertyWin
 {
 public:
-	//To do: How to deal with WndProc?
 	PropertyWin();
 	virtual ~PropertyWin();
 
@@ -26,10 +22,8 @@ public:
 
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 	virtual int DerivedWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) = 0;
-//	/*static*/ void CreateControls(HWND hwnd);
-//	/*static*/ void UpdateLabel();
 
-	int baseCreateWindow(HWND parentHwnd, /*HWND sourceNodeHwnd, */const string& title);
+	int baseCreateWindow(HWND parentHwnd, const string& title);
 	//virtual int createWindow(HWND parentHwnd, HWND sourceNodeHwnd, const string& title) = 0;
 	bool displayWindow();
 
@@ -38,14 +32,41 @@ protected:
 	void DeInitialize();
 
 protected:
-	static string m_ClassName;
-	string	m_Title;
-	uint    m_Style;
-	HWND	m_hwnd;
-	static HWND	m_sourceNodeHwnd;
+	static string	m_ClassName;
+	string			m_Title;
+	uint			m_Style;
+	HWND			m_hwnd;
+	static HWND		m_sourceNodeHwnd;
 
 	static bool m_isInitialized;
+};
 
+struct myMinMax
+{
+	int min;
+	int max;
+};
+
+struct myLabel
+{
+	string startLabel;
+	string endLabel;
+	myMinMax minMax;
+};
+
+myLabel my_Labels[] =
+{
+	{ "RxStart", "RxEnd",{ 0, 100 } },
+	{ "RyStart", "RyEnd",{ 0, 100 } },
+	{ "RzStart", "RzEnd",{ 0, 100 } },
+
+	{ "TxStart", "TxEnd",{ 0, 100 } },
+	{ "TyStart", "TyEnd",{ 0, 100 } },
+	{ "TzStart", "TzEnd",{ 0, 100 } },
+
+	{ "SxStart", "SxEnd",{ 0, 100 } },
+	{ "SyStart", "SyEnd",{ 0, 100 } },
+	{ "SzStart", "SzEnd",{ 0, 100 } },
 };
 
 class __declspec(dllexport) PropertyWinD3DOPGeometry : public PropertyWin
@@ -64,6 +85,5 @@ public:
 
 private:
 	PGeometryOP m_OP3DGeometry;
-	//HWND *m_Track; // [10];
-	HWND m_Track[sizeof(GeometryOP) / sizeof(float)];
+	HWND m_Track[sizeof(my_Labels) / sizeof(my_Labels[0])];  //To do: better way?
 };

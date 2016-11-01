@@ -24,16 +24,19 @@ public:
 		m_Nodes.clear();
 		//cout << "In cstr, m_nodes size: " << m_Nodes.size() << endl;
 	}
-	~NodeManager() //Prevent others to call it 
+	~NodeManager() 
 	{
 		// to do: more processing
 		m_Nodes.clear();
 	} 
-					  // to do : add CRUD for Node handling
+	
+	// to do : add CRUD for Node handling
+	
 	void addNode(INode* node)
 	{
 		m_Nodes.push_back(node);
 	}
+	
 	uint getNodesSize()
 	{
 		return m_Nodes.size();
@@ -73,22 +76,18 @@ public:
 		return nullptr;
 	}
 
-	void Render(int rot)
+	void Render()
 	{
 		//cout << __FUNCTION__ << endl;
 		if (m_Nodes.empty())
 			return; 
-
 		list<INode *>::iterator it;
-		//it = m_Nodes.begin();
-		////*NodeWinD3D *n = */(NodeWinD3D *)(*it)->Render();
+		//int rot = 0;
 
 		for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
 		{
-			//cout << "type_id(INode): " << typeid(*it).name() << endl;
-			//it->Render();
-			
-			dynamic_cast<NodeWin *>(*it)->Render(rot);
+			//To do: eliminate the dynamic_cast
+			dynamic_cast<NodeWin *>(*it)->Render();
 		}
 	}
 
@@ -118,27 +117,26 @@ public:
 	~ContentManager() {} //Prevent others to call it
 						 // to do : add CRUD for Node handling
 private:
-	list<IContent *>*	m_Nodes;
-	mutex		m_Mutex;
-	condition_variable m_CondVar;
+	list<IContent *>	m_Nodes;
+	mutex				m_Mutex;
+	condition_variable	m_CondVar;
 
 };
 
-#define MYRESULT uint
 //For LNK2005 error, add /FORCE:MULTIPLE in linker option: http://stackoverflow.com/questions/10046485/error-lnk2005-already-defined
 
 //Q: To do: Better use of variadic template???
-/*MYRESULT*/int  test1(string s, uint x = 0, long y = 0L)
+int  test1(string s, uint x = 0, long y = 0L)
 {
 	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
 	return 1;
 }
-/*MYRESULT*/ int test2(string s, uint x = 0, long y = 0L)
+int test2(string s, uint x = 0, long y = 0L)
 {
 	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
 	return 2;
 }
-/*MYRESULT*/int test3(string s, uint x = 0, long y = 0L)
+int test3(string s, uint x = 0, long y = 0L)
 {
 	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
 	return 3;
@@ -148,15 +146,10 @@ template<typename R, typename... Args>
 struct testcallback
 {
 	string c;
-	//void (*func)(int i);
 	R (*func)(Args... args);
-	//template<typename... Args>
-	//MYRESULT (*func)(Args... args);
-
 };
 
 testcallback<int, string, uint, long> testCallBack[] =
-//testcallback testCallBack[] = 
 {
 	{ "1", test1 },
 	{ "2", test2 },
@@ -164,19 +157,6 @@ testcallback<int, string, uint, long> testCallBack[] =
 };
 
 //Q: Cannot be inside the TDManager class def? 
-
-//template<typename... Args>
-//struct myCommand_ActionList
-//{
-//	string command;
-//	MYRESULT (*func)(Args... args);
-//};
-//
-//myCommand_ActionList<int> Command_ActionList[] =
-//{
-//	{"Create Node Win D3D", &(TDManager::test)},
-//	{"", TDManager::noCommand}
-//};
 
 //Q: Callback funcs and shared_ptr???
 //Q: For Input, to depend on DirectInput8 only????
@@ -194,8 +174,6 @@ public:
 		long	lparam;
 	}*PmyEvent;
 
-	//typedef myCallback<myEvent> *PmyCallback;
-
 	template<typename R, typename... Args>
 	struct myCommand_Callback
 	{
@@ -205,19 +183,22 @@ public:
 
 	//Q: Why 1 or other number is necessary here? Why cannot be static?
 	/*static*/ TDManager::myCommand_Callback<int, void *, string, TDManager::myEvent> //, uint> 
-		Command_Callback[5] =
+		Command_Callback[6] =
 	{
-		{ "Create Node Win D3D", TDManager::createNodeWinD3D },
+		// Events: creating 'first-level' windows
+		{ "Create Node Win D3D", TDManager::createNodeWinD3D },  //Temp: This NodeWinD3D should be NodeWinD3DGeometry?
 		{ "Create Node OP D3D", TDManager::createNodeOPD3D },
 
-		//Another kind of events
+		// Events: creating a property window
 		{ "D3D Geometry", TDManager::createPropertyWinD3DGeometry },
 
+		//// Events: updating information from property window
+		//{ "D3D Geometry update", TDManager::updateFromPropertyWinD3DGeometry }
 
-		// Another kind of events
+		// Events: drawing lines
+		// Q: Way to pick and move a line???
 		{ "Prepare Draw Line", TDManager::prepareDrawLine},
 		{ "Draw Line", TDManager::DrawLineFromTo}
-
 													   
 	};
 
@@ -232,58 +213,79 @@ public:
 		return m_RootWindow;
 	}
 
-	void Render()
+	NodeManager* getNodeManager()
+	{
+		m_NodeManager = TDSingleton<NodeManager>::getInstance();
+		return m_NodeManager;
+	}
+
+	bool findFrom(HWND hwnd, HWND* foundStart, int *num)
 	{
 		list<std::pair<myEvent, myEvent>>::iterator it;
 		it = m_Connections.begin();
-		int rot = 0;
-		static int i = 1;
 
-		if (m_Connections.size() > 0)
+		for (; it != m_Connections.end(); it++)
 		{
-			for (; it != m_Connections.end(); it++)
+			if (it->second.hwnd == hwnd)
 			{
-				for (int i = 0; i < m_NodeManager->getNodesSize(); i++)
-				{
-					//cout << "finding at: " << i << endl;
-					NodeWin* node = m_NodeManager->findNodeAt(i);
-					//NodeWin * node = dynamic_cast<NodeWin *>(inode);
-					HWND h = node->getNodeWinHandle();
-					if (h == nullptr)
-					{
-						cout << "Node handle is nullptr????" << endl;
-						continue;
-					}
-					else
-					{
-						//cout << "h != nullptr " << endl;
-						if (node->getNodeWinHandle() == it->second.hwnd)
-						{
-							NodeWin *nW = m_NodeManager->getObjectByHwnd(it->first.hwnd);
-							rot = nW->m_Rotation;
-							//cout << "**********rot : " << rot <<
-								//"\t" << "typeid name is : " << typeid(nW).name() << 
-								//endl;
-							//if (typeid(nW).name() == "NodeWinD3D *")
-							{
-								//dynamic_cast<NodeWinD3D *>(nW)->Render(rot);
-								//nW->Render(rot);
-							}
-							//return;
-						}
-						else
-							cout << "Not find" << endl;
-					}
-				}
+				foundStart[*num] = it->first.hwnd;
+				*num += 1;
 			}
 		}
-		//cout << "i = " << i << endl;
-		m_NodeManager->Render(rot);
-		//i++;
-		//if (i > 10)
+		if (*num >= 1)
+			return true;
+		return false;
+	}
+
+	void Render()
+	{
+		//list<std::pair<myEvent, myEvent>>::iterator it;
+		//it = m_Connections.begin();
+		//int rot = 0;
+
+		//if (m_Connections.size() > 0)
 		//{
-		//	i = 0;
+		//	for (; it != m_Connections.end(); it++)
+		//	{
+		//		for (uint i = 0; i < m_NodeManager->getNodesSize(); i++)
+		//		{
+		//			//cout << "finding at: " << i << endl;
+		//			NodeWin* node = m_NodeManager->findNodeAt(i);
+		//			HWND h = node->getNodeWinHandle();
+		//			if (h == nullptr)
+		//			{
+		//				cout << "Node handle is nullptr????" << endl;
+		//				continue;
+		//			}
+		//			else
+		//			{
+		//				//cout << "h != nullptr " << endl;
+		//				if (node->getNodeWinHandle() == it->second.hwnd)
+		//				{
+		//					NodeWin *nW = m_NodeManager->getObjectByHwnd(it->first.hwnd);
+		//					rot = nW->m_Rotation;
+		//					//cout << "**********rot : " << rot <<
+		//						//"\t" << "typeid name is : " << typeid(nW).name() << 
+		//						//endl;
+		//					//if (typeid(nW).name() == "NodeWinD3D *")
+		//					{
+		//						//dynamic_cast<NodeWinD3D *>(nW)->Render(rot);
+		//						//nW->Render(rot);
+		//					}
+		//					//return;
+		//				}
+		//				else
+		//				{
+		//					//cout << "Not find" << endl;
+		//				}
+		//			}
+		//		}
+		//	}
 		//}
+
+
+
+		m_NodeManager->Render();
 	}
 
 	void sendEvent(myEvent event)
@@ -308,14 +310,6 @@ public:
 
 		processEachEvent(e);
 
-		////cout << "event processed ..." << endl;
-		//for (int i = 0; i < sizeof(testCallBack)/sizeof(testCallBack[0]); i++)
-		//{
-		//	//cout << testCallBack[i].c.c_str() << endl;
-		//	int x = (*(testCallBack[i].func))("This is a test string", e.wparam, e.lparam);  //Note: Mind the notation!!!
-		//	//cout << "returning: " << x << endl;
-		//}
-
 		//static int i = 0;
 		//std::thread t = std::thread(&TDManager::createNode<Node>, e, i++);
 
@@ -325,59 +319,22 @@ public:
 		//t.join();
 		////t2.join();
 	}
+
 	uint getEventQueueSize()
 	{
 		return m_Events.size();
 	}
 
-	MYRESULT test(int i)
-	{
-		cout << "i= " << i << endl;
-		return 1;
-	}
-
-	MYRESULT noCommand()
-	{
-		cout << "noCommand " << endl;
-		return 1;
-	}
-
-	////template<class T>
-	//void func(int i) //, T* t)
-	//{
-	//	cout << "i=" << i << endl;
-	//}
 	// to do:add CRUD for Node handling
 protected:
-	////Q: One class can have one thread? No
-	//// Not each object? Using this as above t2
-	//// what is return value used? Not known yet
-	//template<class T>
-	//static uint createNode(TDManager::myEvent e, int i)
-	//{
-	//	cout << "***********called with e = " << e.event << " and i= " << i << endl;
-	//	
-	//	T* t = nullptr;
-	//	t = new T();
-	//	cout << "T: " << typeid(T).name() << endl;
+	//Q: One class can have one thread? No, each object can.
+	// Not each object? Using this as above t2
+	// what is return value used? Not known yet
 
-	//	NodeManager* nM = TDSingleton<NodeManager>::getInstance();
-	//	nM->addNode(t);
-	//	cout << "size of Nodes: " << nM->getNodesSize() << endl;
-
-	//	//delete nM; //Q: necessary? correct?
-	//	//nM = nullptr; 
-	//	delete t;
-	//	t = nullptr;
-
-	//	return e.event;
-	//}
-
-//public:
 	//Q: To do: registration pattern? refer to : http://stackoverflow.com/questions/1096700/instantiate-class-from-name
 	void processEachEvent(const myEvent& e)
 	{
-		cout << "---------->Poping up e.command is : " << e.command.c_str() << endl;
+		//cout << "---------->Poping up e.command is : " << e.command.c_str() << endl;
 		for (int i = 0; i < sizeof(Command_Callback) / sizeof(Command_Callback[0]); i++)
 		{
 			if (e.command == Command_Callback[i].command)
@@ -385,90 +342,31 @@ protected:
 				int x = (*(Command_Callback[i].func))(this, "This is a test string", e);
 			}
 		}
-		//if (e.command == "Create Node Win D3D")
-		//{
-		//	//step1: create and display the node window
-		//	//NodeWin* nW = new NodeWin();
-		//	TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
-		//	NodeWin *nW = f->getInstance();
-
-		//	nW->createWindow(e.hwnd);
-		//	nW->createInputObject();
-		//	nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
-
-		//	//delete nW;
-		//	//nW = nullptr;
-
-		//	//step2: add this node window to NodeManager
-		//}
-		//else
-		//{
-		//	cout << "More to do hereafter..." << endl;
-		//}
 	}
-
-	//static int createNodeWin(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
-	//{
-	//	//Q: Jesus, took me so long to find this! 
-	//	//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
-	//	TDManager* self = (TDManager *)this_Ptr;
-
-	//	//cout << __FUNCTION__ << endl;
-	//	//step1: create and display the node window
-	//	//NodeWin* nW = new NodeWin();
-	//	TDFactory<NodeWin> *f = new TDFactory<NodeWin>();
-	//	NodeWin *nW = f->getInstance();
-
-	//	nW->createWindow(e.hwnd);
-	//	nW->createInputObject();
-	//	nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
-
-	//	//delete nW;
-	//	//nW = nullptr;
-
-	//	//step2: add this node window to NodeManager
-	//	self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
-	//	self->m_NodeManager->addNode(nW);
-	//	//cout << self->m_NodeManager->getNodesSize() << endl;
-	//	return 1;
-	//}
 
 	template<class T>
 	int createNodeWin(HWND hwnd, const string& title)
 	{
-		////step1: create and display the node window
-		//TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
+		//step1: create and display the node window
 		TDFactory<T> *f = new TDFactory<T>();
-		//NodeWinD3D *nWD3D = f->getInstance();
 		T* nW = f->getInstance();
 
-		//nWD3D->createWindow(e.hwnd);
-		//nWD3D->createInputObject();
-		//nWD3D->createGraphicsObject();
-		//nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
 		nW->createWindow(hwnd, title);
 		nW->createInputObject();
-
-		//if (typeid(nW).name() == "NodeWinD3D *")
 		nW->createGraphicsObject(); //Q: Temp: for NodeWinD3D it's valid
-
 		nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
 
-							  //delete nW;
-							  //nW = nullptr;
-
-							  //step2: add this node window to NodeManager
+  		//step2: add this node window to NodeManager
 		m_NodeManager = TDSingleton<NodeManager>::getInstance();
 		m_NodeManager->addNode(nW);
-		//cout << self->m_NodeManager->getNodesSize() << endl;
+
 		return 1;
 	}
 
 	template<class T>
 	int createPropertyWin(HWND parentHwnd, HWND sourceNodeHwnd, const string& title)
 	{
-		cout << __FUNCTION__ << endl;
-
+		//cout << __FUNCTION__ << endl;
 		TDFactory<T> *f = new TDFactory<T>();
 		T* pW = f->getInstance();
 
@@ -479,37 +377,18 @@ protected:
 	}
 
 	//Q: Temp: Take this NodeWinD3D as NodeWinD3DGeometry for now 
-	static int createNodeWinD3D(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	static int createNodeWinD3D(void *this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 	{
 		//Q: Jesus, took me so long to find this! 
 		//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
 		TDManager* self = (TDManager *)this_Ptr;
 
-		////cout << __FUNCTION__ << endl;
-		////step1: create and display the node window
-		////NodeWin* nW = new NodeWin();
 		self->createNodeWin<NodeWinD3D>(e.hwnd, "NodeWinD3DGeometry");
-		//TDFactory<NodeWinD3D> *f = new TDFactory<NodeWinD3D>();
-		//NodeWinD3D *nWD3D = f->getInstance();
-
-		//nWD3D->createWindow(e.hwnd);
-		//nWD3D->createInputObject();
-		//nWD3D->createGraphicsObject();
-		//nWD3D->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
-
-		//					  //delete nW;
-		//					  //nW = nullptr;
-
-		////step2: add this node window to NodeManager
-		//self->m_NodeManager = TDSingleton<NodeManager>::getInstance();
-		//self->m_NodeManager->addNode(nWD3D);
-		////cout << self->m_NodeManager->getNodesSize() << endl;
 		return 1;
 	}
 
 	static int createNodeOPD3D(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 	{
-		cout << __FUNCTION__ << endl;
 		TDManager* self = (TDManager *)this_Ptr;
 
 		self->createNodeWin<NodeOPD3D>(e.hwnd, "NodeOPD3D");
@@ -535,19 +414,24 @@ protected:
 
 		return 1;
 	}
-	
 
+	//static int updateFromPropertyWinD3DGeometry(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+	//{
+	//	TDManager* self = (TDManager *)this_Ptr;
+
+	//	return 1;
+	//}
+	
 	static int prepareDrawLine(void * this_Ptr, string s, myEvent e)
 	{
-		cout << __FUNCTION__ << endl;
 		TDManager* self = (TDManager *)this_Ptr;
 		self->m_PrevEvent = e;
 
 		return 1;
 	}
+
 	static int DrawLineFromTo(void * this_Ptr, string s, myEvent e)
 	{
-		cout << __FUNCTION__ << endl;
 		TDManager* self = (TDManager *)this_Ptr;
 
 		//Q: Temp
@@ -589,36 +473,35 @@ protected:
 
 	int DrawConnections()
 	{
-		cout << __FUNCTION__ << endl;
 		list<std::pair<myEvent, myEvent>>::iterator it;
-		cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
+		//cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
 		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
 		{
 			std::pair<myEvent, myEvent> myPair;
 			myPair = *it;
 
-			//DrawLine(myPair.first.hwnd, myPair.second.hwnd);
 			DrawLine(myPair.first, myPair.second);
 		}
+
 		return 1;
 	}
 
 	int DrawLine(myEvent prevEvent, myEvent curEvent)
 	{
-		cout << __FUNCTION__ << endl;
 		DrawLine(prevEvent.hwnd, curEvent.hwnd);
+
 		return 1;
 	}
+
 	int DrawLine(HWND From, HWND To)
 	{
-		cout << __FUNCTION__ << endl;
 		RECT startRECT;
 		RECT endRECT;
 		HDC hdc;
 		HGDIOBJ original = NULL;
 
-		cout << "From HWND: " << From << endl;
-		cout << "To HWND: " << To << endl;
+		//cout << "From HWND: " << From << endl;
+		//cout << "To HWND: " << To << endl;
 
 		if (To == From)
 		{
@@ -657,24 +540,17 @@ protected:
 			
 			POINT start;
 			POINT end;
-			//GetClientRect(From, &startRECT);
 			start.x = startRECT.right;
 			start.y = startRECT.top + (startRECT.bottom - startRECT.top) / 2;
-			//ClientToScreen(From, &start);
-			//GetClientRect(To, &endRECT);
 			end.x = endRECT.left;
 			end.y = endRECT.bottom - (endRECT.bottom - endRECT.top) / 2;
-			//ClientToScreen(To, &end);
 
-			cout << "Start: " << start.x << ": " << start.y << endl;
-			cout << "End: " << end.x << ": " << end.y << endl;
+			//cout << "Start: " << start.x << ": " << start.y << endl;
+			//cout << "End: " << end.x << ": " << end.y << endl;
 
-
-			//if (bPrevLine) {
-				MoveToEx(hdc, prevFrom.x, prevFrom.y,
-					(LPPOINT)NULL);
-				LineTo(hdc, prevTo.x, prevTo.y);
-			//}
+			MoveToEx(hdc, prevFrom.x, prevFrom.y,
+				(LPPOINT)NULL);
+			LineTo(hdc, prevTo.x, prevTo.y);
 
 			//SelectObject(hdc, GetStockObject(DC_PEN));
 			//SetDCPenColor(hdc, RGB(255, 0, 0));
@@ -686,7 +562,6 @@ protected:
 			prevFrom.y = start.y;
 			prevTo.x = end.x;
 			prevTo.y = end.y;
-			//bPrevLine = true;
 		}
 		return 1;
 	}
@@ -705,15 +580,8 @@ private:
 	queue<myEvent>  m_Events;
 	mutex	m_QueueMutex;
 	//condition_variable m_QueueCondVar;
-	//vector<map<PmyEvent, myCallback>> m_Event_Callbacks;
-	
-	//template<typename T>  //T: should be args...
-	//list<myCommand_Action<T>> m_Command_Action; //Q: list or map?
 
 	RootWindow*		m_RootWindow;
 	//Q: InputClass: one total or each for a nodewin?
 	//InputClass*		m_Input;   //Temp: use DirectInput8 for now, this one for root window
-
 };
-
-

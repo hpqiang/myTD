@@ -28,7 +28,7 @@ const float SCREEN_NEAR = 0.1f;
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: GraphicsClass
 ////////////////////////////////////////////////////////////////////////////////
-class Ops; //forward declaration
+struct myD3DConnectionOP; //forward declaration
 
 class __declspec(dllexport) GraphicsClass
 {
@@ -41,7 +41,9 @@ public:
 	void Shutdown();
 	bool Frame(int,int);
 
-	//	bool Render(Ops* op);
+	bool Render(float rotX, float rotY, float rotZ,
+		float tX, float tY, float tZ,
+		float sX, float sY, float xZ);
 	bool Render(int rot);
 
 private:

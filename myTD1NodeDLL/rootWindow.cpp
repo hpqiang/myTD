@@ -535,7 +535,7 @@ void RootWindow::displayWindow()
 void RootWindow::run()
 {
 	MSG msg;
-	bool done, result;
+	bool done; // , result;
 
 	// Initialize the message structure.
 	ZeroMemory(&msg, sizeof(MSG));
@@ -565,7 +565,7 @@ void RootWindow::run()
 		else
 		{
 			// Otherwise do the frame processing.
-			td_Manager->Render();
+			td_Manager->Render();  //To do: Render should have a return value
 //			result = Frame();
 			//if (!result)
 			//{

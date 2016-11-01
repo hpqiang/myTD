@@ -1,7 +1,6 @@
 #pragma once
 
 //Singleton
-
 template<class T>
 class TDSingleton
 {
@@ -24,7 +23,7 @@ public:
 	}
 private:
 	//TDSingleton(const TDSingleton&) {}  //Prevent copy cstor from happening
-	~TDSingleton() {}  //Don't allow others to call dstor
+	//~TDSingleton() {}  //Don't allow others to call dstor
 	static T* m_Instance;
 };
 

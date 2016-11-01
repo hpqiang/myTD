@@ -1,12 +1,11 @@
 #include <iostream>
+#include <string>
 using namespace std;
 
 #include <Windows.h>
 #include <CommCtrl.h>
 
 #include "PropertyWin.h"
-
-#include <string>
 
 bool PropertyWin::m_isInitialized = false;
 string PropertyWin::m_ClassName = "propertyWinClass";
@@ -158,13 +157,12 @@ void PropertyWin::DeInitialize()
 	m_hwnd = NULL;
 }
 
-int PropertyWin::baseCreateWindow(HWND parentHwnd, /*HWND sourceNodeHwnd, */const string& title)
+int PropertyWin::baseCreateWindow(HWND parentHwnd, const string& title)
 {
-	static int i = 0;
+	static int titleNum = 0;
 	RECT parentClient;
-	//string title = string(m_Title);
 	string myTitle = title;
-	string s = "-" + to_string(i);
+	string s = "-" + to_string(titleNum);
 	myTitle += s;
 	m_Title = myTitle;
 
@@ -172,16 +170,15 @@ int PropertyWin::baseCreateWindow(HWND parentHwnd, /*HWND sourceNodeHwnd, */cons
 
 	// Create the node window. 
 	m_hwnd = CreateWindowEx(
-		0,                      // no extended styles           
-		m_ClassName.c_str(),            // class name                   
-		title.c_str(),				// window name                  
+		0,						// no extended styles           
+		m_ClassName.c_str(),	// class name                   
+		title.c_str(),			// window name                  
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_BORDER
 		,
-		//100 + i * 10, 100 + i * 10, 250, 200,
 		parentClient.right - 200, parentClient.top, 100, 250,
-		parentHwnd,           // parent window handle
-		NULL, //(HMENU)(int)(ID_FIRSTCHILD + 1),	// class menu used              
-		GetModuleHandle(NULL), //m_hinst,				// instance handle              
+		parentHwnd,				// parent window handle
+		NULL,					// class menu used              
+		GetModuleHandle(NULL), 	// instance handle              
 		NULL);                  // no window creation data      
 
 	if (!m_hwnd)
@@ -189,14 +186,7 @@ int PropertyWin::baseCreateWindow(HWND parentHwnd, /*HWND sourceNodeHwnd, */cons
 		cout << "Property Window creation failure" << endl;
 		return FALSE;
 	}
-
-	//m_sourceNodeHwnd = sourceNodeHwnd;
-
-	++i;
-
-	//refer to : http://stackoverflow.com/questions/14661865/use-object-method-as-winapi-wndproc-callback
-	// save the address of the class as the Window's USERDATA.
-//	SetWindowLong(m_hwnd, GWLP_USERDATA, (long)this);
+	++titleNum;
 
 	return TRUE;
 }
@@ -212,26 +202,27 @@ bool PropertyWin::displayWindow()
 
 PropertyWinD3DOPGeometry::PropertyWinD3DOPGeometry()
 {
-	//cout << __FUNCTION__ << " with m_hwnd=" << m_hwnd 
-	//	<< " and this--> " << this << endl;
-	//SetWindowLong(m_hwnd, GWLP_USERDATA, (long)this);
-
+	m_OP3DGeometry = new GeometryOP();
+	memset(m_OP3DGeometry, 0, sizeof(GeometryOP));
 }
 
 PropertyWinD3DOPGeometry::~PropertyWinD3DOPGeometry()
 {
-
+	if (m_OP3DGeometry != nullptr)
+	{
+		delete m_OP3DGeometry;
+		m_OP3DGeometry = nullptr;
+	}
 }
 
-
+//refer to : http://stackoverflow.com/questions/14661865/use-object-method-as-winapi-wndproc-callback
+// save the address of the class as the Window's USERDATA.
 int PropertyWinD3DOPGeometry::createWindow(HWND parentHwnd, HWND sourceNodeHwnd, const string& title)
 {
 	baseCreateWindow(parentHwnd, title);
 	SetWindowLong(m_hwnd, GWLP_USERDATA, (long)this);
 	m_sourceNodeHwnd = sourceNodeHwnd;
 	CreateControls(m_hwnd); //Q: Temp, should not be called here
-
-	//cout << "Size: " << sizeof(GeometryOP) << endl;
 
 	return TRUE;
 }
@@ -252,21 +243,19 @@ int PropertyWinD3DOPGeometry::DerivedWinProc(HWND hwnd, UINT msg, WPARAM wparam,
 		return 0;
 	}
 	default:
-		//return DefWindowProc(hwnd, msg, wparam, lparam);
 		break;
 	}
+	return 0;
 }
 
 void PropertyWinD3DOPGeometry::CreateControls(HWND hwnd)
 {
-	
-	int i = 0;
-	//for (int i = 0; i < sizeof(GeometryOP) / sizeof(float); i++)
+	for (int i = 0; i < sizeof(my_Labels) / sizeof(my_Labels[0]); i++)
 	{
-		HWND hLeftLabel = CreateWindowEx(0, "Static", "0",
+		HWND hLeftLabel = CreateWindowEx(0, "Static", my_Labels[i].startLabel.c_str(), //"0",
 			WS_CHILD | WS_VISIBLE, 0, 0 + i * 40, 10, 30, hwnd, NULL/*(HMENU)1*/, NULL, NULL);
 
-		HWND hRightLabel = CreateWindowEx(0, "Static", "100",
+		HWND hRightLabel = CreateWindowEx(0, "Static", my_Labels[i].endLabel.c_str(),//"100",
 			WS_CHILD | WS_VISIBLE, 0, 0 + i * 40, 30, 30, hwnd, NULL/*(HMENU)2*/, NULL, NULL);
 
 		INITCOMMONCONTROLSEX icex;
@@ -293,15 +282,40 @@ void PropertyWinD3DOPGeometry::CreateControls(HWND hwnd)
 
 void PropertyWinD3DOPGeometry::UpdateLabel()
 {
-	//LRESULT pos[10];
-	LRESULT pos[1];
-	int i = 0;
-	//for (int i = 0; i < sizeof(GeometryOP) / sizeof(float); i++)
+	LRESULT pos[sizeof(my_Labels) / sizeof(my_Labels[0])];
+
+	//LRESULT pos[1];
+	//int i = 0;
+	for (int i = 0; i < sizeof(my_Labels) / sizeof(my_Labels[0]); i++)
 	{
 		pos[i] = SendMessage(m_Track[i], TBM_GETPOS, 0, 0);
 
 		//cout << "pos[ " << i << "] = " << pos[i] << endl;
 		//cout << "m_sourceNodeHwnd: " << m_sourceNodeHwnd << endl;
-		SendMessage(m_sourceNodeHwnd, WM_NOTIFY, 0, pos[i]);
+
+		////Q: Risky doing below. Need to be 'atomic' and send to central controller: TDManager
+		//SendMessage(m_sourceNodeHwnd, WM_NOTIFY, 0, pos[i]);
+		//*m_OP3DGeometry++ = (float)pos[i] / (float) 100;
 	}
+
+	float temp[sizeof(my_Labels) / sizeof(my_Labels[0])];
+
+	for (int i = 0; i < sizeof(my_Labels) / sizeof(my_Labels[0]); i++)
+	{
+		temp[i] = (float)pos[i];
+	}
+	memcpy(m_OP3DGeometry, temp, sizeof(GeometryOP));
+
+	cout << "m_OP3DGeometry Rx: " << m_OP3DGeometry->getRotation().m_Rx << endl;
+	cout << "m_OP3DGeometry Ry: " << m_OP3DGeometry->getRotation().m_Ry << endl;
+	cout << "m_OP3DGeometry Rz: " << m_OP3DGeometry->getRotation().m_Rz << endl;
+
+	cout << "m_OP3DGeometry Tx: " << m_OP3DGeometry->getTranslation().m_Tx << endl;
+	cout << "m_OP3DGeometry Ty: " << m_OP3DGeometry->getTranslation().m_Ty << endl;
+	cout << "m_OP3DGeometry Tz: " << m_OP3DGeometry->getTranslation().m_Tz << endl;
+
+	cout << "m_OP3DGeometry Sx: " << m_OP3DGeometry->getScalar().m_Sx << endl;
+	cout << "m_OP3DGeometry Sy: " << m_OP3DGeometry->getScalar().m_Sy << endl;
+	cout << "m_OP3DGeometry Sz: " << m_OP3DGeometry->getScalar().m_Sz << endl;
+
 }
