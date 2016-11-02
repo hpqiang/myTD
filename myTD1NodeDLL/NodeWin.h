@@ -40,13 +40,14 @@ NodeMenuItem NodePopUpMenuItem[] =
 };
 
 //To do: This struct should be in NodeWinD3D
-struct myD3DConnectionOP
-{
-	PGeometryOP myGeometryOP;
-	PLightOP	myLightOP;
-	PMaterialOP myMaterialOP;
-	PTextureOP	myTextureOP;
-};
+//Q: Make this and other corresponding struct to be shared memory???
+//struct __declspec(dllexport) myD3DConnectionOP
+//{
+//	PGeometryOP myGeometryOP;
+//	PLightOP	myLightOP;
+//	PMaterialOP myMaterialOP;
+//	PTextureOP	myTextureOP;
+//};
 
 class __declspec(dllexport) NodeWin :public Node
 {
@@ -74,6 +75,9 @@ public:
 	//To do: This pure virtual should be in NodeWinD3D
 	virtual void getD3DConnectionOP(myD3DConnectionOP *) = 0;
 
+	//Temp:
+//	virtual void setGeometryOP(PGeometryOP pG) = 0;
+
 protected:
 	int Initialize();
 	void DeInitialize();
@@ -91,7 +95,13 @@ protected:
 	bool			m_isCurrent;
 
 	InputClass*		m_Input;
+	//Temp:
+	static PGeometryOP m_OP3DGeometry;
+
 };
+
+//Temp
+PGeometryOP NodeWin::m_OP3DGeometry = nullptr;
 
 class __declspec(dllexport) NodeWinD3D :public NodeWin
 {
@@ -148,6 +158,11 @@ public:
 		float rotX = m_D3DConnectionOP->myGeometryOP->getRotation().m_Rx;
 		float rotY = m_D3DConnectionOP->myGeometryOP->getRotation().m_Ry;
 		float rotZ = m_D3DConnectionOP->myGeometryOP->getRotation().m_Rz;
+
+		//cout << "rotX : " << rotX << "\t";
+		//cout << "rotY : " << rotY << "\t";
+		//cout << "rotZ : " << rotZ << endl;
+
 		float tX = m_D3DConnectionOP->myGeometryOP->getTranslation().m_Tx;
 		float tY = m_D3DConnectionOP->myGeometryOP->getTranslation().m_Ty;
 		float tZ = m_D3DConnectionOP->myGeometryOP->getTranslation().m_Tz;
@@ -155,9 +170,10 @@ public:
 		float sY = m_D3DConnectionOP->myGeometryOP->getScalar().m_Sy;
 		float sZ = m_D3DConnectionOP->myGeometryOP->getScalar().m_Sz;
 
-		m_Graphics->Render(rotX, rotY, rotZ,
-			tX, tY, tZ,
-			sX, sY, sZ);
+		//m_Graphics->Render(rotX, rotY, rotZ,
+		//	tX, tY, tZ,
+		//	sX, sY, sZ);
+		m_Graphics->Render(m_D3DConnectionOP);
 	}
 
 	//To do: This function should be in NodeWinD3DGeometry and other derived classes

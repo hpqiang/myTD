@@ -221,7 +221,13 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		//cout << "!!!!!!!!!!!!!received pos: " << lparam << endl;
 
 //		m_Rotation = lparam;  //Temp testing
+		//Q: Should have a derived class WndProc???
+		memcpy(m_OP3DGeometry, (PGeometryOP)lparam, wparam);
 
+		//cout << "rotX : " << m_OP3DGeometry->getRotation().m_Rx << "\t";
+		//cout << "rotY : " << m_OP3DGeometry->getRotation().m_Ry << "\t";
+		//cout << "rotZ : " << m_OP3DGeometry->getRotation().m_Rz << endl;
+		////setGeometryOP(lparam);
 		break;
 	}
 	}
@@ -234,6 +240,7 @@ NodeWin::NodeWin()
 	, m_Input(nullptr)
 
 {
+	m_OP3DGeometry = new GeometryOP();
 	Initialize();
 }
 

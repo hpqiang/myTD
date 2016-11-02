@@ -306,16 +306,17 @@ void PropertyWinD3DOPGeometry::UpdateLabel()
 	}
 	memcpy(m_OP3DGeometry, temp, sizeof(GeometryOP));
 
-	cout << "m_OP3DGeometry Rx: " << m_OP3DGeometry->getRotation().m_Rx << endl;
-	cout << "m_OP3DGeometry Ry: " << m_OP3DGeometry->getRotation().m_Ry << endl;
-	cout << "m_OP3DGeometry Rz: " << m_OP3DGeometry->getRotation().m_Rz << endl;
+	//cout << "m_OP3DGeometry Rx: " << m_OP3DGeometry->getRotation().m_Rx << endl;
+	//cout << "m_OP3DGeometry Ry: " << m_OP3DGeometry->getRotation().m_Ry << endl;
+	//cout << "m_OP3DGeometry Rz: " << m_OP3DGeometry->getRotation().m_Rz << endl;
 
-	cout << "m_OP3DGeometry Tx: " << m_OP3DGeometry->getTranslation().m_Tx << endl;
-	cout << "m_OP3DGeometry Ty: " << m_OP3DGeometry->getTranslation().m_Ty << endl;
-	cout << "m_OP3DGeometry Tz: " << m_OP3DGeometry->getTranslation().m_Tz << endl;
+	//cout << "m_OP3DGeometry Tx: " << m_OP3DGeometry->getTranslation().m_Tx << endl;
+	//cout << "m_OP3DGeometry Ty: " << m_OP3DGeometry->getTranslation().m_Ty << endl;
+	//cout << "m_OP3DGeometry Tz: " << m_OP3DGeometry->getTranslation().m_Tz << endl;
 
-	cout << "m_OP3DGeometry Sx: " << m_OP3DGeometry->getScalar().m_Sx << endl;
-	cout << "m_OP3DGeometry Sy: " << m_OP3DGeometry->getScalar().m_Sy << endl;
-	cout << "m_OP3DGeometry Sz: " << m_OP3DGeometry->getScalar().m_Sz << endl;
+	//cout << "m_OP3DGeometry Sx: " << m_OP3DGeometry->getScalar().m_Sx << endl;
+	//cout << "m_OP3DGeometry Sy: " << m_OP3DGeometry->getScalar().m_Sy << endl;
+	//cout << "m_OP3DGeometry Sz: " << m_OP3DGeometry->getScalar().m_Sz << endl;
 
+	SendMessage(m_sourceNodeHwnd, WM_NOTIFY, sizeof(GeometryOP), (LPARAM)m_OP3DGeometry);
 }

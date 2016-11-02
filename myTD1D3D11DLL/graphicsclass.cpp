@@ -176,8 +176,90 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	return true;
 }
 
+
 //To do: add more parameters
-//Q: Cannot pass in myD3DConnectionOP since it's a different dll?
+//Q: Cannot pass in myD3DConnectionOP since it's a different dll? Cannot compile below function body? 
+//#include "../myTD1NodeDLL/NodeWin.h"
+//struct __declspec(dllimport) myD3DConnectionOP;
+
+bool GraphicsClass::Render(myD3DConnectionOP *op)
+{
+	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
+	bool result;
+	static float blue = 1.0f;
+	float rotX=0.0f, rotY = 0.0f, rotZ = 0.0f;
+	float tX = 0.0f, tY = 0.0f, tZ = 0.0f;
+	float sX = 0.0f, sY = 0.0f, sZ = 0.0f;
+
+	// Clear the buffers to begin the scene.
+	m_D3D->BeginScene(0.0f, 0.0f, blue, 0.5f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera->Render();
+
+	// Get the view, projection, and world matrices from the camera and d3d objects.
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_D3D->GetProjectionMatrix(projectionMatrix);
+	m_D3D->GetWorldMatrix(worldMatrix);
+
+	rotX = op->myGeometryOP->getRotation().m_Rx;
+	rotY = op->myGeometryOP->getRotation().m_Ry;
+	rotZ = op->myGeometryOP->getRotation().m_Rz;
+
+	rotX /= 100.0f;
+	rotY /= 100.0f;
+	rotZ /= 100.0f;
+
+	tX = op->myGeometryOP->getTranslation().m_Tx;
+	tY = op->myGeometryOP->getTranslation().m_Ty;
+	tZ = op->myGeometryOP->getTranslation().m_Tz;
+	tX /= 100.0f;
+	tY /= 100.0f;
+	tZ /= 100.0f;
+
+	sX = op->myGeometryOP->getScalar().m_Sx;
+	sY = op->myGeometryOP->getScalar().m_Sy;
+	sZ = op->myGeometryOP->getScalar().m_Sz;
+	sX /= 100.0f;
+	sY /= 100.0f;
+	sZ /= 100.0f;
+
+	//cout << "tX: " << tX << "\t" << "tY: " << tY << "tZ: " << tZ << endl;
+	//cout << "sX: " << sX << "\t" << "sY: " << sY << "sZ: " << sZ << endl;
+
+
+	D3DXMATRIX mR, mT, mS;
+	//D3DXMatrixRotationYawPitchRoll(&worldMatrix, rotX, rotY, rotZ);
+	D3DXMatrixRotationYawPitchRoll(&mR, rotX, rotY, rotZ);
+	//D3DXMatrixIdentity(&mT);
+	D3DXMatrixTranslation(&mT, tX, tY, tZ);
+	//D3DXMatrixIdentity(&mS);
+	D3DXMatrixScaling(&mS, sX, sY, sZ);
+	//worldMatrix = mR*mT*mS;
+	D3DXMATRIX mRT;
+	//D3DXMatrixIdentity(&mRT);
+
+	D3DXMatrixMultiply(&mRT, &mR, &mT);
+	D3DXMatrixMultiply(&worldMatrix, &mRT, &mS);
+
+
+
+	m_Model->Render(m_D3D->GetDeviceContext());
+
+	// Render the model using the texture shader.
+	result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+		m_Model->GetTexture());
+	if (!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D->EndScene();
+
+	return true;
+}
+
 bool GraphicsClass::Render(float rotX, float rotY, float rotZ,
 	float tX, float tY, float tZ,
 	float sX, float sY, float sZ)
@@ -186,6 +268,9 @@ bool GraphicsClass::Render(float rotX, float rotY, float rotZ,
 	bool result;
 	static float blue = 1.0f;
 	//float rotation = 0.0f;
+	static float prevRotX = 0.0f;
+	static float prevRotY = 0.0f;
+	static float prevRotZ = 0.0f;
 
 	// Clear the buffers to begin the scene.
 	m_D3D->BeginScene(0.0f, 0.0f, blue, 0.5f);
@@ -202,9 +287,23 @@ bool GraphicsClass::Render(float rotX, float rotY, float rotZ,
 	//float rotX = op->myGeometryOP->getRotation().m_Rx;
 	//To do: add more operations
 	//cout << "rotX : " << rotX << "Y: " << rotY << "Z: " << rotZ << endl;
-	D3DXMatrixRotationX(&worldMatrix, rotX);
-	//D3DXMatrixRotationY(&worldMatrix, rotY);
-	//D3DXMatrixRotationZ(&worldMatrix, rotZ);
+	//if (prevRotX != rotX)
+		//D3DXMatrixRotationX(&worldMatrix, rotX / 100.0f);
+	//if (prevRotY != rotY)
+		//D3DXMatrixRotationY(&worldMatrix, rotY / 100.0f);
+	//if (prevRotZ != rotZ)
+	//cout << "rotZ : " << rotZ << endl;
+//		D3DXMatrixRotationZ(&worldMatrix, rotZ / 100.0f);
+	
+	rotX /= 100.0f;
+	rotY /= 100.0f;
+	rotZ /= 100.0f;
+
+	D3DXMatrixRotationYawPitchRoll(&worldMatrix, rotX, rotY, rotZ);
+
+	//prevRotX = rotX;
+	//prevRotY = rotY;
+	//prevRotZ = rotZ;
 
 	//if (rotation > (90.0f / (float)D3DX_PI))
 	//{

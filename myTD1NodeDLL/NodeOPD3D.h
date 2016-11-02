@@ -17,16 +17,41 @@ public:
 		return;
 	}
 
+	////Temp
+	//void setGeometryOP(PGeometryOP pG) 
+	//{
+	//	myRotation mR;
+	//	mR.m_Rx = 5.0f;
+	//	mR.m_Ry = 5.5f;
+	//	mR.m_Rz = 2.0f;
+	//	pG->setRotation(mR);
+	//}
+
 	//Temp: avoid a compile error since now this class is actually derived from NodeWin
 	//Temp: This should be done with NodeOPD3DGeometry
 	virtual void getD3DConnectionOP(myD3DConnectionOP *op)
 	{
 		//cout << "Calling to this function: " << __FUNCTION__ << endl;
-		myRotation mR;
-		mR.m_Rx = 5.0f;
-		mR.m_Ry = 5.5f;
-		mR.m_Rz = 2.0f;
-		op->myGeometryOP->setRotation(mR);
+		//myRotation mR;
+		//mR.m_Rx = 5.0f;
+		//mR.m_Ry = 5.5f;
+		//mR.m_Rz = 2.0f;
+
+		if (op == nullptr)
+		{
+			return;
+		}
+		if (op->myGeometryOP == nullptr)
+		{
+			return;
+		}
+		if (m_OP3DGeometry == nullptr)
+		{
+			return;
+		}
+		op->myGeometryOP->setRotation(m_OP3DGeometry->getRotation());
+		op->myGeometryOP->setTranslation(m_OP3DGeometry->getTranslation());
+		op->myGeometryOP->setScalar(m_OP3DGeometry->getScalar());
 
 		return;
 	}
