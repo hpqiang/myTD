@@ -240,15 +240,15 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 		case WM_LBUTTONDOWN:
 		{
 //			bPrevLine = true;
-			//return 0;
-			break;
+			return 0;
+			//break;
 		}
 
 		case WM_LBUTTONUP:
 		{
 //			bPrevLine = false;
-			//return 0;
-			break;
+			return 0;
+			//break;
 		}
 
 

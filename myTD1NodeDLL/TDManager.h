@@ -174,6 +174,13 @@ public:
 		long	lparam;
 	}*PmyEvent;
 
+	struct myConnLine
+	{
+		HWND hwnd;
+		long *x;
+		long *y;
+	};
+
 	template<typename R, typename... Args>
 	struct myCommand_Callback
 	{
@@ -192,6 +199,10 @@ public:
 		// Events: creating a property window
 		{ "D3D Geometry", TDManager::createPropertyWinD3DGeometry },
 
+		// Events: Node window status update
+		
+		{ "Node Window Moved", TDManager::nodeWinMove },
+
 		//// Events: updating information from property window
 		//{ "D3D Geometry update", TDManager::updateFromPropertyWinD3DGeometry }
 
@@ -201,7 +212,6 @@ public:
 		{ "Draw Line", TDManager::DrawLineFromTo}
 													   
 	};
-
 
 public:
 	TDManager();
@@ -221,7 +231,8 @@ public:
 
 	bool findFrom(HWND hwnd, HWND* foundStart, int *num)
 	{
-		list<std::pair<myEvent, myEvent>>::iterator it;
+		//list<std::pair<myEvent, myEvent>>::iterator it;
+		list<std::pair<myConnLine, myConnLine>>::iterator it;
 		it = m_Connections.begin();
 
 		for (; it != m_Connections.end(); it++)
@@ -237,54 +248,27 @@ public:
 		return false;
 	}
 
-	void Render()
+	bool findTo(HWND hwnd, HWND* foundStart, int *num)
 	{
 		//list<std::pair<myEvent, myEvent>>::iterator it;
-		//it = m_Connections.begin();
-		//int rot = 0;
+		list<std::pair<myConnLine, myConnLine>>::iterator it;
+		it = m_Connections.begin();
 
-		//if (m_Connections.size() > 0)
-		//{
-		//	for (; it != m_Connections.end(); it++)
-		//	{
-		//		for (uint i = 0; i < m_NodeManager->getNodesSize(); i++)
-		//		{
-		//			//cout << "finding at: " << i << endl;
-		//			NodeWin* node = m_NodeManager->findNodeAt(i);
-		//			HWND h = node->getNodeWinHandle();
-		//			if (h == nullptr)
-		//			{
-		//				cout << "Node handle is nullptr????" << endl;
-		//				continue;
-		//			}
-		//			else
-		//			{
-		//				//cout << "h != nullptr " << endl;
-		//				if (node->getNodeWinHandle() == it->second.hwnd)
-		//				{
-		//					NodeWin *nW = m_NodeManager->getObjectByHwnd(it->first.hwnd);
-		//					rot = nW->m_Rotation;
-		//					//cout << "**********rot : " << rot <<
-		//						//"\t" << "typeid name is : " << typeid(nW).name() << 
-		//						//endl;
-		//					//if (typeid(nW).name() == "NodeWinD3D *")
-		//					{
-		//						//dynamic_cast<NodeWinD3D *>(nW)->Render(rot);
-		//						//nW->Render(rot);
-		//					}
-		//					//return;
-		//				}
-		//				else
-		//				{
-		//					//cout << "Not find" << endl;
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
+		for (; it != m_Connections.end(); it++)
+		{
+			if (it->first.hwnd == hwnd)
+			{
+				foundStart[*num] = it->second.hwnd;
+				*num += 1;
+			}
+		}
+		if (*num >= 1)
+			return true;
+		return false;
+	}
 
-
-
+	void Render()
+	{
 		m_NodeManager->Render();
 	}
 
@@ -376,6 +360,31 @@ protected:
 		return 1;
 	}
 
+	template<class T>
+	int moveNodeWin(myEvent e) 
+	{
+		//list<std::pair<myEvent, myEvent>>::iterator it;
+		list<std::pair<myConnLine, myConnLine>>::iterator it;
+		RECT rect;
+		GetWindowRect(e.hwnd, &rect);
+
+		//cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
+		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
+		{
+			if (it->first.hwnd == e.hwnd)
+			{
+				DrawLine(it->first, it->second, true);
+			}
+			if (it->second.hwnd == e.hwnd)
+			{
+				DrawLine(it->first, it->second,true);
+			}
+			RedrawWindow(e.hwnd, &rect, NULL, true); //???
+		}
+
+		return 1;
+	}
+
 	//Q: Temp: Take this NodeWinD3D as NodeWinD3DGeometry for now 
 	static int createNodeWinD3D(void *this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 	{
@@ -415,12 +424,14 @@ protected:
 		return 1;
 	}
 
-	//static int updateFromPropertyWinD3DGeometry(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
-	//{
-	//	TDManager* self = (TDManager *)this_Ptr;
+	static int nodeWinMove(void * this_Ptr, string s, myEvent e)
+	{
+		TDManager* self = (TDManager *)this_Ptr;
 
-	//	return 1;
-	//}
+		self->moveNodeWin<NodeWin>(e);
+
+		return 1;
+	}
 	
 	static int prepareDrawLine(void * this_Ptr, string s, myEvent e)
 	{
@@ -443,28 +454,50 @@ protected:
 
 		if (!self->existFromTo(self->m_PrevEvent,e))
 		{
-			if (self->m_PrevEvent.hwnd != e.hwnd)  //REally temp here???
+			if (self->m_PrevEvent.hwnd != nullptr)
 			{
-				cout << "Adding to pair for: " << self->m_PrevEvent.hwnd <<
-					"and : " << e.hwnd;
-				//Save necessary information to m_Connections
-				std::pair<myEvent, myEvent> myPair;
-				myPair = std::make_pair(self->m_PrevEvent, e);
-				self->m_Connections.push_back(myPair);
+				if (self->m_PrevEvent.hwnd != e.hwnd)  //REally temp here???
+				{
+					cout << "Adding to pair for: " << self->m_PrevEvent.hwnd <<
+						"and : " << e.hwnd;
+					//Save necessary information to m_Connections
+					//std::pair<myEvent, myEvent> myPair;
+					std::pair<myConnLine, myConnLine> myPair;
+					myConnLine prev;
+					myConnLine cur;
+					prev.hwnd = self->m_PrevEvent.hwnd;
+					prev.x = new long();
+					prev.y = new long();
+					cur.hwnd = e.hwnd;
+					cur.x = new long();
+					cur.y = new long();
+					//myPair = std::make_pair(self->m_PrevEvent, e);
+					myPair = std::make_pair(prev, cur);
+					self->m_Connections.push_back(myPair);
+				}
+			}
+			else
+			{
+				cout << "m_PrevEvent.hwnd is nullptr" << endl;
 			}
 		}
 		self->DrawConnections();
 
 		//self->m_PrevEvent = *(myEvent *)nullptr;
+		self->m_PrevEvent.hwnd = nullptr;  //Temp
+
 
 		return 1;
 	}
 
 	bool existFromTo(myEvent prevEvent, myEvent e)
 	{
-		list<pair<myEvent, myEvent>>::iterator it;
+		//list<pair<myEvent, myEvent>>::iterator it;
+		list<std::pair<myConnLine, myConnLine>>::iterator it;
+
 		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
 		{
+			//if (it->first.hwnd == prevEvent.hwnd && it->second.hwnd == e.hwnd)
 			if (it->first.hwnd == prevEvent.hwnd && it->second.hwnd == e.hwnd)
 				return true;
 		}
@@ -473,11 +506,14 @@ protected:
 
 	int DrawConnections()
 	{
-		list<std::pair<myEvent, myEvent>>::iterator it;
+		//list<std::pair<myEvent, myEvent>>::iterator it;
+		list<std::pair<myConnLine, myConnLine>>::iterator it;
+
 		//cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
 		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
 		{
-			std::pair<myEvent, myEvent> myPair;
+			//std::pair<myEvent, myEvent> myPair;
+			std::pair<myConnLine, myConnLine> myPair;
 			myPair = *it;
 
 			DrawLine(myPair.first, myPair.second);
@@ -486,15 +522,16 @@ protected:
 		return 1;
 	}
 
-	int DrawLine(myEvent prevEvent, myEvent curEvent)
+	//int DrawLine(myEvent prevEvent, myEvent curEvent)
+	int DrawLine(myConnLine prev, myConnLine cur)
 	{
-		DrawLine(prevEvent.hwnd, curEvent.hwnd);
+		//DrawLine(prev.hwnd, cur.hwnd);
 
-		return 1;
-	}
+		//return 1;
+	//}
 
-	int DrawLine(HWND From, HWND To)
-	{
+	//int DrawLine(HWND From, HWND To)
+	//{
 		RECT startRECT;
 		RECT endRECT;
 		HDC hdc;
@@ -502,6 +539,8 @@ protected:
 
 		//cout << "From HWND: " << From << endl;
 		//cout << "To HWND: " << To << endl;
+		HWND From = prev.hwnd;
+		HWND To = cur.hwnd;
 
 		if (To == From)
 		{
@@ -511,7 +550,86 @@ protected:
 
 		if (To != nullptr)
 		{
-			static POINT prevFrom, prevTo;
+			//static POINT prevFrom, prevTo;
+
+			HWND parentHwnd = GetParent(To);
+			RECT parentClientRect;
+			GetClientRect(parentHwnd, &parentClientRect);
+			//InvalidateRect(parentHwnd, &parentClientRect, false);
+			//ShowWindow(parentHwnd, SW_SHOW);
+			//RedrawWindow(parentHwnd, &parentClientRect, NULL, RDW_UPDATENOW); // RDW_INVALIDATE); // | RDW_ERASE);
+
+			hdc = GetDC(GetParent(To));
+
+			SelectObject(hdc, GetStockObject(DC_PEN));
+			SetDCPenColor(hdc, RGB(0, 0, 0));  //black color
+
+			GetWindowRect(From, &startRECT);
+			//cout << " startRECT: " << startRECT.right <<
+			//	": " << startRECT.top << endl;
+			//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
+			MapWindowPoints(HWND_DESKTOP, GetParent(From), (LPPOINT)&startRECT, 2);
+			GetWindowRect(To, &endRECT);
+			//cout << "                end RECT: " << endRECT.left <<
+			//	": " << endRECT.bottom << endl;
+			MapWindowPoints(HWND_DESKTOP, GetParent(To), (LPPOINT)&endRECT, 2);
+
+			////HPQ: refer to http://winapi.freetechsecrets.com/win32/WIN32Drawing_Lines_with_the_Mouse.htm
+			//SetROP2(hdc, R2_NOTXORPEN);
+			
+			POINT start;
+			POINT end;
+			start.x = startRECT.right;
+			start.y = startRECT.top + (startRECT.bottom - startRECT.top) / 2;
+			end.x = endRECT.left;
+			end.y = endRECT.bottom - (endRECT.bottom - endRECT.top) / 2;
+
+			//cout << "Start: " << start.x << ": " << start.y << endl;
+			//cout << "End: " << end.x << ": " << end.y << endl;
+
+			//MoveToEx(hdc, prevFrom.x, prevFrom.y,
+			//	(LPPOINT)NULL);
+			//LineTo(hdc, prevTo.x, prevTo.y);
+
+			//SelectObject(hdc, GetStockObject(DC_PEN));
+			//SetDCPenColor(hdc, RGB(255, 0, 0));
+
+			MoveToEx(hdc, start.x, start.y, NULL);
+			LineTo(hdc, end.x, end.y);
+
+			*prev.x = start.x;
+			*prev.y = start.y;
+			*cur.x = end.x;
+			*cur.y = end.y;
+			//prevFrom.x = start.x;
+			//prevFrom.y = start.y;
+			//prevTo.x = end.x;
+			//prevTo.y = end.y;
+		}
+		return 1;
+	}
+
+	int DrawLine(myConnLine prev, myConnLine cur, bool moveFlag)
+	{
+		RECT startRECT;
+		RECT endRECT;
+		HDC hdc;
+		HGDIOBJ original = NULL;
+
+		//cout << "From HWND: " << From << endl;
+		//cout << "To HWND: " << To << endl;
+		HWND From = prev.hwnd;
+		HWND To = cur.hwnd;
+
+		if (To == From)
+		{
+			cout << "Waring: same from and to!!!!!" << endl;
+			return -1;
+		}
+
+		if (To != nullptr)
+		{
+			//static POINT prevFrom, prevTo;
 
 			HWND parentHwnd = GetParent(To);
 			RECT parentClientRect;
@@ -526,18 +644,18 @@ protected:
 			//SetDCPenColor(hdc, RGB(255, 0, 0));
 
 			GetWindowRect(From, &startRECT);
-			cout << " startRECT: " << startRECT.right <<
-				": " << startRECT.top << endl;
+			//cout << " startRECT: " << startRECT.right <<
+			//	": " << startRECT.top << endl;
 			//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
 			MapWindowPoints(HWND_DESKTOP, GetParent(From), (LPPOINT)&startRECT, 2);
 			GetWindowRect(To, &endRECT);
-			cout << "                end RECT: " << endRECT.left <<
-				": " << endRECT.bottom << endl;
+			//cout << "                end RECT: " << endRECT.left <<
+			//	": " << endRECT.bottom << endl;
 			MapWindowPoints(HWND_DESKTOP, GetParent(To), (LPPOINT)&endRECT, 2);
 
 			////HPQ: refer to http://winapi.freetechsecrets.com/win32/WIN32Drawing_Lines_with_the_Mouse.htm
 			SetROP2(hdc, R2_NOTXORPEN);
-			
+
 			POINT start;
 			POINT end;
 			start.x = startRECT.right;
@@ -548,9 +666,10 @@ protected:
 			//cout << "Start: " << start.x << ": " << start.y << endl;
 			//cout << "End: " << end.x << ": " << end.y << endl;
 
-			MoveToEx(hdc, prevFrom.x, prevFrom.y,
+
+			MoveToEx(hdc, *prev.x, *prev.y,
 				(LPPOINT)NULL);
-			LineTo(hdc, prevTo.x, prevTo.y);
+			LineTo(hdc, *cur.x, *cur.y);
 
 			//SelectObject(hdc, GetStockObject(DC_PEN));
 			//SetDCPenColor(hdc, RGB(255, 0, 0));
@@ -558,13 +677,18 @@ protected:
 			MoveToEx(hdc, start.x, start.y, NULL);
 			LineTo(hdc, end.x, end.y);
 
-			prevFrom.x = start.x;
-			prevFrom.y = start.y;
-			prevTo.x = end.x;
-			prevTo.y = end.y;
+			*prev.x = start.x;
+			*prev.y = start.y;
+			*cur.x = end.x;
+			*cur.y = end.y;
+			//(*prevFrom).x = start.x;
+			//(*prevFrom).y = start.y;
+			//(*prevTo).x = end.x;
+			//(*prevTo).y = end.y;
 		}
 		return 1;
 	}
+
 
 private:
 	NodeManager*	m_NodeManager;
@@ -573,7 +697,8 @@ private:
 	mutex	m_Mutex;
 	condition_variable m_CondVar;
 
-	list<std::pair<myEvent, myEvent>> m_Connections; //Q: Also serve as a mediator???
+	//	list<std::pair<myEvent, myEvent>> m_Connections; //Q: Also serve as a mediator???
+	list<std::pair<myConnLine, myConnLine>> m_Connections; //Q: Also serve as a mediator???
 	mutex	m_MutexConnection;
 	myEvent		m_PrevEvent;
 

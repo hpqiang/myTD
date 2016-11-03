@@ -67,23 +67,84 @@ HWND PropertyWin::m_sourceNodeHwnd = nullptr;
 //}
 
 //refer to : http://stackoverflow.com/questions/14661865/use-object-method-as-winapi-wndproc-callback
-LRESULT CALLBACK PropertyWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+//Q: WM_CREATE cannot be sent to derived winproc???
+LRESULT CALLBACK PropertyWin::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	PropertyWin *pW = (PropertyWin *)GetWindowLong(hwnd, GWLP_USERDATA);
 
-//	cout << "hwnd: " << hwnd << endl;
-//	cout << "pW--->" << pW << endl;
-	if (pW == nullptr)
-		return DefWindowProc(hwnd, umsg, wparam, lparam);
+	//if (umsg == WM_CREATE)
+	//{
+	//	cout << __FUNCTION__ << "WM_CREATE!!!!" << endl;
+	//}
 
-	pW->DerivedWinProc(hwnd, umsg, wparam, lparam);
-	return DefWindowProc(hwnd, umsg, wparam, lparam);
-	//switch (umsg)
+	//	cout << "hwnd: " << hwnd << endl;
+	//	cout << "pW--->" << pW << endl;
+	if (pW == nullptr)
+	{
+		//cout << "pW is nullptr with umsg = " << msg << endl;
+		//return DefWindowProc(hwnd, umsg, wparam, lparam);
+	}
+	else
+	{
+		pW->DerivedWinProc(hwnd, msg, wparam, lparam);
+		//return DefWindowProc(hwnd, umsg, wparam, lparam);
+	}
+
+	//PropertyWinD3DOPGeometry *pThis;
+
+	////cout << "msg: " << msg << endl;
+
+	////Refer to: http://stackoverflow.com/questions/21369256/how-to-use-wndproc-as-a-class-function
+	//if (msg == WM_NCCREATE)
+	////if (msg == WM_CREATE)
+	//{
+	//	cout << "create msg: " << msg << endl;
+
+	//	//pThis = static_cast<PropertyWinD3DOPGeometry *>(reinterpret_cast<CREATESTRUCT*>(lparam)->lpCreateParams);
+	//	pThis = (PropertyWinD3DOPGeometry *)(reinterpret_cast<CREATESTRUCT*>(lparam)->lpCreateParams);
+
+	//	SetLastError(0);
+	//	//if (!SetWindowLongPtr(hwnd, GWL_USERDATA, reinterpret_cast<LONG_PTR>(pThis)))
+	//	if (!SetWindowLong(hwnd, GWL_USERDATA, (long)(pThis)))
+	//	{
+	//		if (pThis != nullptr)
+	//		{
+	//			pThis->CreateControls(hwnd);
+	//		}
+	//		else
+	//		{
+	//			cout << "pThis is nullptr" << endl;
+	//		}
+	//		if (GetLastError() != 0)
+	//			return FALSE;
+	//	}
+	//}
+	//else
+	//{
+	//	cout << "non create msg: " << msg << endl;
+	//	//pW = reinterpret_cast<PropertyWin *>(GetWindowLongPtr(hwnd, GWL_USERDATA));
+	//	pW = (PropertyWin *)(GetWindowLong(hwnd, GWL_USERDATA));
+	//	if (pW != nullptr)
+	//	{
+	//		pW->DerivedWinProc(hwnd, msg, wparam, lparam);
+	//	}
+	//	else
+	//	{
+	//		cout << "pW is nullptr!" << endl;
+	//	}
+	//}
+
+
+	//switch (msg)
 	//{
 	//case WM_CREATE:
 	//{
 	//	//refer to : http://zetcode.com/gui/winapi/controlsII/
 	//	///*PropertyWin::*/CreateControls(hwnd);
+
+	//	//SetWindowLong(m_hwnd, GWLP_USERDATA, (long)this);
+
+	//	cout << __FUNCTION__ << "***************WM_CREATE!!!!" << endl;
 	//	return 0;
 	//}
 	//case WM_HSCROLL:
@@ -105,7 +166,7 @@ LRESULT CALLBACK PropertyWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARA
 	//	return 0;
 	//}
 	//}
-	//return DefWindowProc(hwnd, umsg, wparam, lparam);
+	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
 PropertyWin::PropertyWin()
@@ -188,6 +249,9 @@ int PropertyWin::baseCreateWindow(HWND parentHwnd, const string& title)
 	}
 	++titleNum;
 
+	//SetWindowLong(m_hwnd, GWLP_USERDATA, (long)this);
+
+
 	return TRUE;
 }
 
@@ -229,7 +293,11 @@ int PropertyWinD3DOPGeometry::createWindow(HWND parentHwnd, HWND sourceNodeHwnd,
 
 int PropertyWinD3DOPGeometry::DerivedWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	//cout << __FUNCTION__ << endl;
+	////if (msg == WM_CREATE)
+	//{
+	//	cout << __FUNCTION__ << msg << endl;
+	//}
+
 	switch (msg)
 	{
 	case WM_CREATE: //Q: Who ate this WM_CREATE message???

@@ -176,12 +176,7 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	return true;
 }
 
-
-//To do: add more parameters
-//Q: Cannot pass in myD3DConnectionOP since it's a different dll? Cannot compile below function body? 
-//#include "../myTD1NodeDLL/NodeWin.h"
-//struct __declspec(dllimport) myD3DConnectionOP;
-
+//To do: below geometry is for world matrix, not yet for object local space
 bool GraphicsClass::Render(myD3DConnectionOP *op)
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
@@ -220,9 +215,24 @@ bool GraphicsClass::Render(myD3DConnectionOP *op)
 	sX = op->myGeometryOP->getScalar().m_Sx;
 	sY = op->myGeometryOP->getScalar().m_Sy;
 	sZ = op->myGeometryOP->getScalar().m_Sz;
-	sX /= 100.0f;
-	sY /= 100.0f;
-	sZ /= 100.0f;
+	if (sX >= 1.0f)
+	{
+		sX = 0.0f;
+	}
+	if (sY >= 1.0f)
+	{
+		sY = 0.0f;
+	}
+	if (sZ >= 1.0f)
+	{
+		sZ = 0.0f;
+	}
+	sX = 1.0f - sX;
+	sY = 1.0f - sY;
+	sZ = 1.0f - sZ;
+	//sX /= 100.0f;
+	//sY /= 100.0f;
+	//sZ /= 100.0f;
 
 	//cout << "tX: " << tX << "\t" << "tY: " << tY << "tZ: " << tZ << endl;
 	//cout << "sX: " << sX << "\t" << "sY: " << sY << "sZ: " << sZ << endl;

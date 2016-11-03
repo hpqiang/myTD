@@ -80,7 +80,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 		//SendMessage(GetParent(hwnd), USER_1, 0, 0);
 		curEvent.event = 0; //Q: Is ths event important here?
-		curEvent.command = "Draw Line";
+		curEvent.command = "Node Window Moved";
 		curEvent.hwnd = hwnd;
 		curEvent.wparam = wparam;
 		curEvent.lparam = lparam;

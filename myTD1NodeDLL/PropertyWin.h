@@ -27,6 +27,8 @@ public:
 	//virtual int createWindow(HWND parentHwnd, HWND sourceNodeHwnd, const string& title) = 0;
 	bool displayWindow();
 
+	//virtual void CreateControls(HWND hwnd) = 0;
+
 protected:
 	int Initialize();
 	void DeInitialize();
@@ -79,7 +81,7 @@ public:
 	
 	virtual int DerivedWinProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) override;
 	
-	void CreateControls(HWND hwnd);
+	void CreateControls(HWND hwnd); // override;
 	
 	void UpdateLabel();
 

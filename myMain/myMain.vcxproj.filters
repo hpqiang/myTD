@@ -26,8 +26,5 @@
     <ClInclude Include="tabWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DefineCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

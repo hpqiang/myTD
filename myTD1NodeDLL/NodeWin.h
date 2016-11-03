@@ -112,6 +112,7 @@ public:
 		m_D3DConnectionOP = new myD3DConnectionOP();
 		//To do: for other component of m_D3DConnectionOP
 		m_D3DConnectionOP->myGeometryOP = new GeometryOP();
+		//Issue: Scale cannot be initialized to 0.0f, should be 1.0f
 		memset(m_D3DConnectionOP->myGeometryOP, 0.0f, sizeof(GeometryOP));
 	}
 	~NodeWinD3D() 
