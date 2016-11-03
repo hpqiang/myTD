@@ -174,11 +174,19 @@ public:
 		long	lparam;
 	}*PmyEvent;
 
-	struct myConnLine
+	struct myConnPoint
 	{
 		HWND hwnd;
 		long *x;
 		long *y;
+	};
+
+	struct myConnLine
+	{
+		std::pair<myConnPoint, myConnPoint> myLine;
+		bool	isSelected;
+		//RGB		color; //etc...
+		int		style; //etc....
 	};
 
 	template<typename R, typename... Args>
@@ -232,14 +240,15 @@ public:
 	bool findFrom(HWND hwnd, HWND* foundStart, int *num)
 	{
 		//list<std::pair<myEvent, myEvent>>::iterator it;
-		list<std::pair<myConnLine, myConnLine>>::iterator it;
+		//list<std::pair<myConnLine, myConnLine>>::iterator it;
+		list<myConnLine *>::iterator it;
 		it = m_Connections.begin();
 
 		for (; it != m_Connections.end(); it++)
 		{
-			if (it->second.hwnd == hwnd)
+			if ( (*it)->myLine.second.hwnd == hwnd)
 			{
-				foundStart[*num] = it->first.hwnd;
+				foundStart[*num] = (*it)->myLine.first.hwnd; // it->first.hwnd;
 				*num += 1;
 			}
 		}
@@ -251,14 +260,16 @@ public:
 	bool findTo(HWND hwnd, HWND* foundStart, int *num)
 	{
 		//list<std::pair<myEvent, myEvent>>::iterator it;
-		list<std::pair<myConnLine, myConnLine>>::iterator it;
+		//list<std::pair<myConnLine, myConnLine>>::iterator it;
+		list<myConnLine *>::iterator it;
+
 		it = m_Connections.begin();
 
 		for (; it != m_Connections.end(); it++)
 		{
-			if (it->first.hwnd == hwnd)
+			if ( (*it)->myLine.first.hwnd == hwnd)
 			{
-				foundStart[*num] = it->second.hwnd;
+				foundStart[*num] = (*it)->myLine.second.hwnd; //it->second.hwnd;
 				*num += 1;
 			}
 		}
@@ -307,6 +318,48 @@ public:
 	uint getEventQueueSize()
 	{
 		return m_Events.size();
+	}
+
+	//bool isHittingConnLine(long x, long y, HWND *From, HWND *To)
+	bool isHittingConnLine(long x, long y) //, std::pair<HWND *, HWND *> *myPair, int *num)
+	{
+		//list<std::pair<myConnLine, myConnLine>>::iterator it;
+		list<myConnLine *>::iterator it;
+
+		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
+		{
+			//*num = 0;
+			long startX = *((*it)->myLine.first.x); //*(it->first.x);
+			long startY = *((*it)->myLine.first.y);
+			long endX = *((*it)->myLine.second.x);
+			long endY = *((*it)->myLine.second.y);
+
+			if (x < min(startX, endX) || x > max(startX, endX)
+				|| y < min(startY, endY) || y > max(startY, endY))
+			{
+				continue;
+			}
+
+			float k1 = (float)(y - startY) / (float)(x - startX);
+			float k2 = (float)(endY - startY) / (float)(endX - startX);
+			if ( ( (k1 - k2) < 0.1f ) && ( (k1 - k2) > -0.1f ) )
+			{
+				//myPair->first = &((*it)->myLine.first.hwnd);
+				//myPair->second = &((*it)->myLine.second.hwnd);
+				//myPair
+
+				(*it)->isSelected = true;
+
+				//*num++;
+				//*From = it->first.hwnd;
+				//*To = it->second.hwnd;
+				return true;
+			}
+		}
+
+		//From = nullptr; //????
+		//To = nullptr;
+		return false;
 	}
 
 	// to do:add CRUD for Node handling
@@ -364,22 +417,24 @@ protected:
 	int moveNodeWin(myEvent e) 
 	{
 		//list<std::pair<myEvent, myEvent>>::iterator it;
-		list<std::pair<myConnLine, myConnLine>>::iterator it;
-		RECT rect;
-		GetWindowRect(e.hwnd, &rect);
+		//list<std::pair<myConnLine, myConnLine>>::iterator it;
+		list<myConnLine *>::iterator it;
+		//RECT rect;
+		//GetWindowRect(e.hwnd, &rect);
 
 		//cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
 		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
 		{
-			if (it->first.hwnd == e.hwnd)
+			//if (it->first.hwnd == e.hwnd)
+			if ( (*it)->myLine.first.hwnd == e.hwnd)
 			{
-				DrawLine(it->first, it->second, true);
+				DrawLine( (*it)->myLine.first, (*it)->myLine.second, true);
 			}
-			if (it->second.hwnd == e.hwnd)
+			if ((*it)->myLine.second.hwnd == e.hwnd)
 			{
-				DrawLine(it->first, it->second,true);
+				DrawLine((*it)->myLine.first, (*it)->myLine.second, true);
 			}
-			RedrawWindow(e.hwnd, &rect, NULL, true); //???
+			//RedrawWindow(e.hwnd, &rect, NULL, true); //???
 		}
 
 		return 1;
@@ -462,18 +517,23 @@ protected:
 						"and : " << e.hwnd;
 					//Save necessary information to m_Connections
 					//std::pair<myEvent, myEvent> myPair;
-					std::pair<myConnLine, myConnLine> myPair;
-					myConnLine prev;
-					myConnLine cur;
+					std::pair<myConnPoint, myConnPoint> myPair;
+					myConnPoint prev;
+					myConnPoint cur;
 					prev.hwnd = self->m_PrevEvent.hwnd;
 					prev.x = new long();
 					prev.y = new long();
 					cur.hwnd = e.hwnd;
 					cur.x = new long();
 					cur.y = new long();
+					myConnLine *oneLine = new myConnLine(); //To do: use factory pattern
+					oneLine->myLine.first = prev;
+					oneLine->myLine.second = cur;
+					oneLine->isSelected = false;
 					//myPair = std::make_pair(self->m_PrevEvent, e);
-					myPair = std::make_pair(prev, cur);
-					self->m_Connections.push_back(myPair);
+					//myPair = std::make_pair(prev, cur);
+					//self->m_Connections.push_back(myPair);
+					self->m_Connections.push_back(oneLine);
 				}
 			}
 			else
@@ -493,12 +553,14 @@ protected:
 	bool existFromTo(myEvent prevEvent, myEvent e)
 	{
 		//list<pair<myEvent, myEvent>>::iterator it;
-		list<std::pair<myConnLine, myConnLine>>::iterator it;
+		//list<std::pair<myConnLine, myConnLine>>::iterator it;
+		list<myConnLine *>::iterator it;
 
 		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
 		{
 			//if (it->first.hwnd == prevEvent.hwnd && it->second.hwnd == e.hwnd)
-			if (it->first.hwnd == prevEvent.hwnd && it->second.hwnd == e.hwnd)
+			//if (it->first.hwnd == prevEvent.hwnd && it->second.hwnd == e.hwnd)
+			if ((*it)->myLine.first.hwnd == prevEvent.hwnd && (*it)->myLine.second.hwnd == e.hwnd)
 				return true;
 		}
 		return false;
@@ -507,23 +569,26 @@ protected:
 	int DrawConnections()
 	{
 		//list<std::pair<myEvent, myEvent>>::iterator it;
-		list<std::pair<myConnLine, myConnLine>>::iterator it;
+		//list<std::pair<myConnLine, myConnLine>>::iterator it;
+		list<myConnLine *>::iterator it;
 
 		//cout << "*********** size of m_Connections: " << m_Connections.size() << endl;
 		for (it = m_Connections.begin(); it != m_Connections.end(); it++)
 		{
 			//std::pair<myEvent, myEvent> myPair;
-			std::pair<myConnLine, myConnLine> myPair;
-			myPair = *it;
+			//std::pair<myConnLine, myConnLine> myPair;
+			//myPair = *it;
 
-			DrawLine(myPair.first, myPair.second);
+			//DrawLine(myPair.first, myPair.second);
+			DrawLine((*it)->myLine.first, (*it)->myLine.second);
 		}
 
 		return 1;
 	}
 
 	//int DrawLine(myEvent prevEvent, myEvent curEvent)
-	int DrawLine(myConnLine prev, myConnLine cur)
+	//int DrawLine(myConnLine prev, myConnLine cur)
+	int DrawLine(myConnPoint prev, myConnPoint cur)
 	{
 		//DrawLine(prev.hwnd, cur.hwnd);
 
@@ -609,7 +674,7 @@ protected:
 		return 1;
 	}
 
-	int DrawLine(myConnLine prev, myConnLine cur, bool moveFlag)
+	int DrawLine(myConnPoint prev, myConnPoint cur, bool moveFlag)
 	{
 		RECT startRECT;
 		RECT endRECT;
@@ -698,7 +763,9 @@ private:
 	condition_variable m_CondVar;
 
 	//	list<std::pair<myEvent, myEvent>> m_Connections; //Q: Also serve as a mediator???
-	list<std::pair<myConnLine, myConnLine>> m_Connections; //Q: Also serve as a mediator???
+	//list<std::pair<myConnLine, myConnLine>> m_Connections; //Q: Also serve as a mediator???
+	list<myConnLine *> m_Connections; //Q: Also serve as a mediator???
+
 	mutex	m_MutexConnection;
 	myEvent		m_PrevEvent;
 

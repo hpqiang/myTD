@@ -239,7 +239,20 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 		}
 		case WM_LBUTTONDOWN:
 		{
-//			bPrevLine = true;
+			td_Manager = TDSingleton<TDManager>::getInstance();
+
+			HWND From;
+			HWND To;
+			if ( td_Manager->isHittingConnLine(LOWORD(lparam), HIWORD(lparam) ) == true)
+			{
+				//system("cls");
+				cout << "Hitting the line!!!!" << endl;
+			}
+			else
+			{
+				cout << "Not hitting.... " << endl;
+			}
+
 			return 0;
 			//break;
 		}
