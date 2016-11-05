@@ -1,6 +1,6 @@
-#include <iostream>
-#include <string>
-using namespace std;
+//#include <iostream>
+//#include <string>
+//using namespace std;
 
 #include <Windows.h>
 #include <CommCtrl.h>

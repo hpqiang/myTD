@@ -1,9 +1,6 @@
 #pragma once
 
-#include <list>
-
 #include <Windows.h>
-//#include "NodeWin.h"
 
 class __declspec(dllexport) RootWindow
 {
@@ -11,7 +8,6 @@ public:
 	RootWindow(); 
 	~RootWindow();
 
-//	static void insertOneNodeWindow(NodeWindow& nW);
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 	void displayWindow();
@@ -32,12 +28,6 @@ public:
 protected:
 	int Initialize();
 	void DeInitialize();
-
-	//static NodeWindow& addOneNodeWindow(HWND hwnd);
-	//static void moveChildWindows(HWND hwnd, RECT prevRECT);
-	//static void drawConnection(HWND hwnd, bool);
-
-	//bool Frame();
 
 private:
 	LPCTSTR m_ClassName;

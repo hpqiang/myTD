@@ -1,12 +1,10 @@
-#include <string>
-
-#include "TDManager.h"
 #include "NodeWin.h"
+#include "TDSingleton.h"
+#include "TDManager.h"
+#include "NodeOPD3D.h"
 
 bool NodeWin::m_isInitialized = false;
 string NodeWin::m_ClassName = "nodeWinClass";
-//string NodeWin::m_Title = "nodeWin";
-
 
 //To do: should use the one in rootWindow.cpp????
 void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
@@ -41,10 +39,8 @@ void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
 
 LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	//RECT rcClient;
-	//int i;
 	static bool bCanDrawLine = false;
-	static HWND prevH = nullptr; // , curH = nullptr;
+	static HWND prevH = nullptr; 
 	static TDManager::myEvent prevEvent, curEvent;
 	TDManager* td_Manager = nullptr;
 	TDManager::myEvent e;
@@ -54,31 +50,26 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		//// Check if the window is being closed.
 	case WM_CLOSE:
 	{
-		//cout << "closing..." << endl;
+		cout << "closing..." << endl;
+		td_Manager = TDSingleton<TDManager>::getInstance();
+		NodeManager* nM = td_Manager->getNodeManager();
+
+		nM->removeNode(hwnd);
+		td_Manager->removeFromTo(hwnd);
 
 		DestroyWindow(hwnd);
+//		td_Manager->DrawConnections();
+
 		return 0;
 	}
 	case WM_MOVE:
 	{
-		//if (prevH == hwnd)
-		//{
-		//	cout << "Moving in same window..." << endl;
-		//	return 0;
-		//}
-		//if (prevH == nullptr)
-		//{
-		//	cout << "Not an actual move..." << endl;
-		//	return 0;
-		//}
-
 		if (!bCanDrawLine)
 		{
 			cout << "Not an actual move..." << endl;
 			return 0;
 		}
 
-		//SendMessage(GetParent(hwnd), USER_1, 0, 0);
 		curEvent.event = 0; //Q: Is ths event important here?
 		curEvent.command = "Node Window Moved";
 		curEvent.hwnd = hwnd;
@@ -89,15 +80,11 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		td_Manager->sendEvent(curEvent);
 
 		prevEvent = {};
-		//prevH = nullptr;
 
-		//return 0;
 		break;
 	}
 	case WM_SIZE:
 	{
-		//cout << "sizing..." << endl;
-		//return 0;
 		break;
 	}
 	case WM_LBUTTONDOWN:
@@ -111,13 +98,10 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		prevEvent.wparam = wparam;
 		prevEvent.lparam = lparam;
 
-		//return 0;
 		break;
 	}
 	case WM_LBUTTONUP:
 	{
-		//curH = hwnd;
-		
 		if (prevH == hwnd)
 		{
 			cout << "mouse up detected in same window..." << endl;
@@ -149,33 +133,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 		prevEvent = {}; //Q: Not necessary since both prevEvent and curEvent had been consumed???
 		curEvent = {};
-		//prevH = nullptr;
 
-		//float delta = 0.0f;
-		//static float rot = 0.01f;
-
-		//if (prevH == curH)
-		//{
-		//	cout << "Clicked on same child window" << endl;
-		//	return 0;
-		//}
-
-		//WindowManager* wM = WindowManager::getWindowManager();
-		//NodeWindow *prevNW = wM->findNodeWindow(prevH);
-		//NodeWindow *curNW = wM->findNodeWindow(curH);
-
-		//curNW->setConnectedFrom(prevH);
-		//prevNW->setConnectedTo(curH);
-
-		//Ops *op = new Ops();
-		//delta += rot;
-		//rot += 0.01f;
-		//op->setRotation(rot);
-		//curNW->setOps(op);
-
-		//SendMessage(GetParent(curH), USER_1, 0, 0);
-
-		//return 0;
 		break;
 	}
 	case WM_RBUTTONUP:
@@ -211,23 +169,17 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		//step2: decide corresponding content in the client area
 		//		 e.g., D3D geometry content???
 
-
-
 		break;
 	}
 	//case 1000:
 	case WM_NOTIFY:
 	{
-		//cout << "!!!!!!!!!!!!!received pos: " << lparam << endl;
-
-//		m_Rotation = lparam;  //Temp testing
 		//Q: Should have a derived class WndProc???
 		memcpy(m_OP3DGeometry, (PGeometryOP)lparam, wparam);
 
 		//cout << "rotX : " << m_OP3DGeometry->getRotation().m_Rx << "\t";
 		//cout << "rotY : " << m_OP3DGeometry->getRotation().m_Ry << "\t";
 		//cout << "rotZ : " << m_OP3DGeometry->getRotation().m_Rz << endl;
-		////setGeometryOP(lparam);
 		break;
 	}
 	}
@@ -295,7 +247,6 @@ void NodeWin::DeInitialize()
 int NodeWin::createWindow(HWND parentHwnd, const string& title)
 {
 	static int i = 0;
-	//string title = string(m_Title);
 	string myTitle = title;
 	string s = "-" + to_string(i);
 	myTitle += s;
@@ -313,38 +264,23 @@ int NodeWin::createWindow(HWND parentHwnd, const string& title)
 		| WS_OVERLAPPEDWINDOW
 		,
 		100 + i * 10, 100 + i * 10, 250, 200,
-		parentHwnd,           // parent window handle
-		NULL, //(HMENU)(int)(ID_FIRSTCHILD + 1),	// class menu used              
-		GetModuleHandle(NULL), //m_hinst,				// instance handle              
-		NULL);                  // no window creation data      
+		parentHwnd,					// parent window handle
+		NULL,						// class menu used              
+		GetModuleHandle(NULL), 		// instance handle              
+		NULL);						// no window creation data      
 
 	if (!m_hwnd)
 		return FALSE;
 
-	//Q: Does m_hwnd get a parent hwnd now? 
-
-	//HPQ: suitable place to set these values?
-	//if (!NodeWindow::m_ParentHwnd)
-	//	NodeWindow::m_ParentHwnd = parentHwnd;
-	//if (!NodeWindow::m_hinst)
-	//	NodeWindow::m_hinst = GetModuleHandle(NULL);
 	++i;
 
 	return TRUE;
 }
 
-//#include <iostream>
-//using namespace std;
-
 bool NodeWin::displayWindow()
 {
 	BringWindowToTop(m_hwnd);
 	ShowWindow(m_hwnd, SW_SHOW);
-
-	//cout << "displaying window..." << m_hwnd << endl;
-
-	//ShowWindow(m_hwnd, SW_SHOWDEFAULT);
-	//UpdateWindow(m_hwnd);
 
 	return true;
 }
@@ -370,7 +306,7 @@ void NodeWinD3D::getD3DConnectionOP(myD3DConnectionOP *op)
 	NodeManager* nM = tM->getNodeManager();
 	NodeWin*	nW = nullptr;
 	//step1: find all From windows connected to this window
-	HWND *hwndFrom = new HWND[3]; //temp: Assuming no more than 3 connections
+	HWND *hwndFrom = new HWND[5]; //temp: Assuming no more than 5 connections
 	int foundNum = 0;
 
 	if (tM->findFrom(m_hwnd, hwndFrom, &foundNum) != false)

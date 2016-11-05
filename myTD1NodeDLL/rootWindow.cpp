@@ -1,17 +1,7 @@
-#include <list>
-#include <thread>
-
+#include "CommonDefs.h"
+#include "TDSingleton.h"
 #include "TDManager.h"
 #include "rootWindow.h"
-
-#include <iostream>
-using namespace std;
-
-//void RootWindow::insertOneNodeWindow(NodeWindow& nW)
-//{
-//	WindowManager* wM = WindowManager::getWindowManager();
-//	wM->addNodeWindow(&nW);
-//}
 
 //Q: Error moving below menu defs to rootWindow.h???
 typedef struct Menu
@@ -140,6 +130,7 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 	static RECT prevRECT;
 	static bool bPrevLine = false;
 	TDManager* td_Manager = nullptr;
+	NodeManager* nM = nullptr;
 	TDManager::myEvent e;
 
 	switch (umsg)
@@ -202,183 +193,57 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 		case WM_CLOSE:
 		{
 			PostQuitMessage(0);
-			return 0;
-		}
-
-		case WM_LBUTTONDBLCLK:
-		{
-			//NodeWindow& nW = addOneNodeWindow(hwnd);
-			//
-			////HPQ: have to use std::ref????
-			////std::thread t = std::thread(insertOneNodeWindow,nW);
-			////HPQ: Below works fine
-			////std::thread t = std::thread(insertOneNodeWindow,std::ref(nW));
-			////HPQ: Why below works? Not clear invoking method conceptually
-			//std::thread t = std::thread([&](NodeWindow& nW) 
-			//{
-			//	insertOneNodeWindow(std::ref(nW));
-			//}, std::ref(nW) );
-
-			//t.join();//HPQ: do we need to call join? RAII??
 
 			return 0;
 		}
 
-		case WM_ENTERSIZEMOVE: 
-		{
-			//GetWindowRect(hwnd, &prevRECT);
-			//MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&prevRECT, 2);
-			return 0;
-		}
-		case WM_SIZE:   // main window changed size 
-		{
-			//moveChildWindows(hwnd, prevRECT);
-			//SendMessage(hwnd, USER_1, 0, 0);
-
-			return 0;
-		}
 		case WM_LBUTTONDOWN:
 		{
 			td_Manager = TDSingleton<TDManager>::getInstance();
 
 			HWND From;
 			HWND To;
-			if ( td_Manager->isHittingConnLine(LOWORD(lparam), HIWORD(lparam) ) == true)
+			int num = 0;
+
+			if ( td_Manager->isHittingConnLine(LOWORD(lparam), HIWORD(lparam), &num ) == true)
 			{
 				//system("cls");
-				cout << "Hitting the line!!!!" << endl;
+				//cout << "Hitting the line!!!! with num = " << num << endl;
+				td_Manager->DrawConnections();
 			}
 			else
 			{
-				cout << "Not hitting.... " << endl;
+				//cout << "Not hitting....with num= " << num << endl;
 			}
 
 			return 0;
 			//break;
 		}
 
-		case WM_LBUTTONUP:
+		case WM_KEYDOWN:
 		{
-//			bPrevLine = false;
-			return 0;
-			//break;
+			switch (wparam)
+			{
+			case VK_DELETE:
+			{
+				//cout << "Delete key hitted" << endl;
+
+				td_Manager = TDSingleton<TDManager>::getInstance();
+				td_Manager->deleteSelectedLines();
+				td_Manager->DrawConnections();
+
+				break;
+			}
+			}
 		}
-
-
-		//case USER_1:
-		//{
-		//	drawConnection(hwnd, bPrevLine);// , hdc);
-		//	//RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
-
-		//	return 0;
-		//}
 
 	}
 	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
-//void RootWindow::moveChildWindows(HWND hwnd, RECT prevRECT)
-//{
-//	RECT rc;
-//	// Get the dimensions of the main window's client 
-//	// area, and enumerate the child windows. Pass the 
-//	// dimensions to the child windows during enumeration. 
-//	GetWindowRect(hwnd, &rc);
-//	MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rc, 2);
-//
-//	WindowManager* wM = WindowManager::getWindowManager();
-//
-//	for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
-//	{
-//		HWND h = nullptr;
-//		NodeWindow *nW = wM->findNodeWindow(i);
-//		RECT rcChild;
-//		float ratioW = ((float)(rc.right - rc.left) / (float)(prevRECT.right - prevRECT.left));
-//		float ratioH = ((float)(rc.bottom - rc.top) / (float)(prevRECT.bottom - prevRECT.top));
-//
-//		//cout << "ratioW: " << ratioW << "\t";
-//		//cout << "ratioH: " << ratioH << endl;
-//
-//		h = nW->getNodeWindowHandle();
-//
-//		GetWindowRect(h, &rcChild);
-//		MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rcChild, 2);
-//
-//		MoveWindow(h, rcChild.left * ratioW, rcChild.top * ratioH, 
-//			(rcChild.right - rcChild.left) * ratioW, //Q: Unsafe, is there a winapi?
-//			(rcChild.bottom - rcChild.top) * ratioH,
-//			true
-//		);
-//	}
-//
-//}
-//
-//void RootWindow::drawConnection(HWND hwnd, bool bPrevLine)
-//{
-//	RECT startRECT;
-//	RECT endRECT;
-//	HDC hdc;
-//	HGDIOBJ original = NULL;
-//	static POINT prevFrom;
-//	static POINT prevTo;
-//	//static bool bPrevLine = false;
-//
-//	hdc = GetDC(hwnd);
-//
-//	//SelectObject(hdc, GetStockObject(DC_PEN));
-//	//SetDCPenColor(hdc, RGB(255, 0, 0));
-//
-//	WindowManager* wM = WindowManager::getWindowManager();
-//
-//	for (int i = 0; i < wM->getNodeWindowsSize(); ++i)
-//	{
-//		HWND startH = nullptr;
-//		HWND toH = nullptr;
-//		NodeWindow *nW = wM->findNodeWindow(i);
-//		bPrevLine = false;
-//
-//		startH = nW->getNodeWindowHandle();
-//		toH = nW->getConnectedTo();
-//		//nW->getConnectedTo(&toH);
-//
-//		if (toH != nullptr)
-//		{
-//			GetWindowRect(startH, &startRECT);
-//			//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
-//			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&startRECT, 2);
-//			GetWindowRect(toH, &endRECT);
-//			MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&endRECT, 2);
-//
-//			//HPQ: refer to http://winapi.freetechsecrets.com/win32/WIN32Drawing_Lines_with_the_Mouse.htm
-//			SetROP2(hdc, R2_NOTXORPEN);
-//
-//			if (bPrevLine) {
-//				MoveToEx(hdc, prevFrom.x, prevFrom.y,
-//					(LPPOINT)NULL);
-//				LineTo(hdc, prevTo.x, prevTo.y);
-//			}
-//
-//			//SelectObject(hdc, GetStockObject(DC_PEN));
-//			//SetDCPenColor(hdc, RGB(255, 0, 0));
-//
-//			MoveToEx(hdc, startRECT.right, startRECT.bottom, NULL);
-//			LineTo(hdc, endRECT.left, endRECT.top);
-//
-//			prevFrom.x = startRECT.right;
-//			prevFrom.y = startRECT.bottom;
-//			prevTo.x = endRECT.left;
-//			prevTo.y = endRECT.top;
-//			bPrevLine = true;
-//		}
-//
-//	}
-//	ReleaseDC(hwnd, hdc);
-//}
-
 RootWindow::RootWindow()
 	: m_ClassName(""), m_Title("")
 	, m_Style(0), m_hinst(nullptr), m_hwnd(nullptr)
-	//, m_Input(nullptr)//, m_Graphics(nullptr)
 {
 	Initialize();
 }
@@ -406,7 +271,7 @@ int RootWindow::Initialize()
 	wcex.hIcon = LoadIcon(m_hinst, IDI_WINLOGO);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = "simple menu"; //MAKEINTRESOURCE(IDM_MYMENURESOURCE); //NULL;
+	wcex.lpszMenuName = "simple menu";
 	wcex.lpszClassName = m_ClassName;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_WINLOGO);
 	if (!RegisterClassEx(&wcex))
@@ -439,18 +304,6 @@ void RootWindow::DeInitialize()
 	// Show the mouse cursor.
 	ShowCursor(true);
 
-	//if (m_Input)
-	//{
-	//	delete m_Input;
-	//	m_Input = nullptr;
-	//}
-
-	//if (m_Graphics)
-	//{
-	//	delete m_Graphics;
-	//	m_Graphics = nullptr;
-	//}
-
 	// Remove the window.
 	DestroyWindow(m_hwnd);
 	m_hwnd = NULL;
@@ -461,83 +314,6 @@ void RootWindow::DeInitialize()
 
 	return;
 }
-
-//bool RootWindow::createInputObject()
-//{
-//	m_Input = new InputClass;
-//	if (!m_Input)
-//	{
-//		return false;
-//	}
-//
-//	RECT rc;
-//	GetWindowRect(m_hwnd, &rc);
-//	int w = rc.right - rc.left;
-//	int h = rc.bottom - rc.top;
-//	// Initialize the input object.
-//	m_Input->Initialize();
-//
-//	return true;
-//}
-//
-//bool RootWindow::createGraphicsObject()
-//{
-//	bool result;
-//	RECT rc;
-//	GetWindowRect(m_hwnd, &rc);
-//	int w = rc.right - rc.left;
-//	int h = rc.bottom - rc.top;
-//
-//	m_Graphics = new GraphicsClass;
-//	if (!m_Graphics)
-//	{
-//		return false;
-//	}
-//
-//	// Initialize the graphics object.
-//	result = m_Graphics->Initialize(w, h, m_hwnd);
-//	if (!result)
-//	{
-//		return false;
-//	}
-//	return true;
-//}
-//
-//NodeWindow& RootWindow::addOneNodeWindow(HWND hwnd)
-//{
-//	NodeWindow* nodeWindow = new NodeWindow();
-//
-//	nodeWindow->createWindow(hwnd);
-//	nodeWindow->createInputObject();
-//	nodeWindow->createGraphicsObject();
-//
-//	BringWindowToTop(nodeWindow->getNodeWindowHandle());
-//	ShowWindow(nodeWindow->getNodeWindowHandle(), SW_SHOW);
-//
-//	return *nodeWindow;
-//}
-//
-//bool RootWindow::Frame()
-//{
-//	bool result;
-//	int mouseX, mouseY;
-//	WindowManager* wM = WindowManager::getWindowManager();
-//
-//	for (int i = 0; i < wM->getNodeWindowsSize(); i++)
-//	{
-//		NodeWindow* nW = wM->findNodeWindow(i);
-//		if (nW != nullptr)
-//		{
-//			nW->Frame();
-//		}
-//		else
-//		{
-//			cout << "nullptr..." << endl;
-//		}
-//
-//	}
-//	return true;
-//}
 
 void RootWindow::displayWindow()
 {

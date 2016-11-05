@@ -5,6 +5,8 @@ template<class T>
 class TDSingleton
 {
 public:
+	// Refer to: http://stackoverflow.com/questions/1724036/splitting-templated-c-classes-into-hpp-cpp-files-is-it-possible
+	// A function for template class has to be here, cannot be moved to corresponding .cpp file
 	static T* getInstance()
 	{
 		if (m_Instance == nullptr)

@@ -149,6 +149,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ContentManager.h" />
+    <ClInclude Include="NodeManager.h" />
     <ClInclude Include="NodeOP2D.h" />
     <ClInclude Include="NodeOP3D.h" />
     <ClInclude Include="CommonDefs.h" />
@@ -166,12 +168,15 @@
     <ClInclude Include="TDSingleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ContentManager.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClCompile Include="NodeManager.cpp" />
     <ClCompile Include="NodeWin.cpp" />
     <ClCompile Include="PropertyWin.cpp" />
     <ClCompile Include="rootWindow.cpp" />
     <ClCompile Include="TDManager.cpp" />
+    <ClCompile Include="TDSingleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\myTD1D3D11DLL\myTD1D3D11DLL.vcxproj">

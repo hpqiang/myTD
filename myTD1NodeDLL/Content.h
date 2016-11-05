@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CommonDefs.h"
 
 class IContent
 {

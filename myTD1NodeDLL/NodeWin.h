@@ -1,10 +1,7 @@
 #pragma once
 
-#include "CommonDefs.h"
 #include "Node.h"
-//#include "NodeOPD3D.h"
-//#include "TDManager.h"
-//#include "TDSingleton.h"
+#include "inputclass.h"
 #include "graphicsclass.h"
 
 typedef struct NodeMenu
@@ -39,16 +36,6 @@ NodeMenuItem NodePopUpMenuItem[] =
 	{ 302, 503, "&OGL Geometry","OGL Geometry" },
 };
 
-//To do: This struct should be in NodeWinD3D
-//Q: Make this and other corresponding struct to be shared memory???
-//struct __declspec(dllexport) myD3DConnectionOP
-//{
-//	PGeometryOP myGeometryOP;
-//	PLightOP	myLightOP;
-//	PMaterialOP myMaterialOP;
-//	PTextureOP	myTextureOP;
-//};
-
 class __declspec(dllexport) NodeWin :public Node
 {
 public:
@@ -74,9 +61,6 @@ public:
 
 	//To do: This pure virtual should be in NodeWinD3D
 	virtual void getD3DConnectionOP(myD3DConnectionOP *) = 0;
-
-	//Temp:
-//	virtual void setGeometryOP(PGeometryOP pG) = 0;
 
 protected:
 	int Initialize();
@@ -184,5 +168,3 @@ private:
 	GraphicsClass		*m_Graphics;  //Q: Why need to add myTD1NodeDLL as reference in myMain????
 	myD3DConnectionOP	*m_D3DConnectionOP;
 };
-
-

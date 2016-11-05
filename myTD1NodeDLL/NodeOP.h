@@ -3,10 +3,6 @@
 #include "CommonDefs.h"
 #include "Node.h"
 #include "NodeWin.h"
-//#include "NodeOP.h"
-//#include "NodeOP3D.h"
-
-//#include "NodeOPD3D.h"
 
 class IOP
 {

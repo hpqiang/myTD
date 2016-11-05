@@ -27,6 +27,7 @@ const float SCREEN_NEAR = 0.1f;
 
 
 //Temp for myD3DConnectionOP
+//Q: Make this and other corresponding struct to be shared memory???
 struct myRotation
 {
 	float m_Rx;  //In radian

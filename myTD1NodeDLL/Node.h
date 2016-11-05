@@ -1,22 +1,10 @@
 #pragma once
 
-#include <vector>
-#include <queue>
-#include <list>
-#include <map>
-#include <mutex>
-#include <condition_variable>
-using namespace std;
-
 #if defined(_WIN32)
 #include <windows.h>
-//else
 #endif
 
 #include "CommonDefs.h"
-#include "Content.h"
-#include "inputclass.h"
-//#include "graphicsclass.h"
 
 class INode
 {
@@ -36,23 +24,14 @@ class INode
 
 	virtual bool	ConnectFrom(const INode& nodeIn) = 0;
 	virtual bool	ConnectTo(const INode& nodeOut) = 0;
-
-	//virtual void    Render(int rot) = 0;
-	//Q: Interface needs destructor???
-	//virtual ~INode() = 0;
 };
 
 class __declspec(dllexport) Node : public INode
 {
 public:
 	Node()
-		: m_Content( nullptr ) //??? which constructor is it using?
 	{
 	}
-	//Node(const Node& node) 
-	//{
-	//	this = node;
-	//}
 	virtual ~Node(){}
 
 	//Q: have to define these here?
@@ -109,17 +88,11 @@ public:
 		return true;
 	}
 
-	//virtual void    Render(int rot) override
-	//{
-	//	return;
-	//}
-
 private:
+	//Q: Define them somewhere else?
 	INode*  m_NodeIn; //Q: Can use INode& here?
 	uint	m_NumOfNodeIn;
 	INode*	m_NodeOut;
 	uint	m_NumOfNodeOut;
-
-	IContent* m_Content;
 };
 

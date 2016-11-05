@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CommonDefs.h"
-#include "OP.h"
+#include "NodeOP.h"
 
 typedef struct ColorOP
 {

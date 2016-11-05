@@ -9,7 +9,7 @@
 #include "TDSingleton.h"
 #include "TDFactory.h"
 
-#include "tabWindow.h"
+//#include "NodeManager.h" //Q: Why need to include this here??
 
 #include <thread>
 
@@ -17,6 +17,98 @@ using namespace std;
 
 void test()
 {
+	//struct C
+	//{
+	//	int a;
+	//	float b;
+	//};
+
+	//C c[]=
+	//{
+	//	{1, 1.1f},
+	//	{2, 2.2f},
+	//	{3, 3.3f},
+	//};
+
+	//template<typename R, typename... Args>
+	//struct D
+	//{
+	//	int a;
+	//	float b;
+	//	R (*func)(Args... args);
+	//};
+
+	//D<int, int, string, string> d[] =
+	//{
+	//	{1, 1.1f, f1},
+	//	{2, 2.2f, f2},
+	//};
+
+	//int f1(int a, float b)
+	//{
+	//	return 1;
+	//}
+	//int f2(int a, float b)
+	//{
+	//	return 1;
+	//}
+
+	//class A
+	//{
+	//public:
+	//	struct X
+	//	{
+	//		int a;
+	//		float b;
+	//		double c;
+	//	};
+
+	//	X x[2] = 
+	//	{
+	//		{1, 3.3f, 4.4f},
+	//		{2, 6.6f, 6.6f}
+	//	};
+
+	//	template<class T>
+	//	class Z
+	//	{
+	//		int a;
+	//		T* t;
+	//	};
+
+
+	//	Z<A> z[] =
+	//	{
+	//		{1},
+	//		{2},
+	//	};
+
+
+	//	template<typename T, typename... Args>
+	//	class YY
+	//	{
+	//		int a;
+	//		string b;
+	//		T(*func)(Args...args);
+	//	};
+
+	//	A::YY<int, void *, int, string> yy[] =  //Q: YY is not a template here???
+	//	{
+	//		{1, "Mike", f1},
+	//		{2, "Qiang", f2},
+	//	};
+
+	//	static int f1(int a, string b)
+	//	{
+	//		return 1;
+	//	}
+
+	//	static int f2(int a, string b)
+	//	{
+	//		return 1;
+	//	}
+	//};
+
 	//double a = 7.4;
 	//int b = 99;
 
@@ -27,6 +119,39 @@ void test()
 	//cout << "a + (a * b) = " <<
 	//	MathLibrary::Functions::AddMultiply(a, b) << endl;
 }
+
+//Q: To do: Better use of variadic template???
+//int  test1(string s, uint x = 0, long y = 0L)
+//{
+//	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
+//	return 1;
+//}
+//int test2(string s, uint x = 0, long y = 0L)
+//{
+//	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
+//	return 2;
+//}
+//int test3(string s, uint x = 0, long y = 0L)
+//{
+//	cout << __FUNCTION__ << "s = " << s.c_str() << endl;
+//	return 3;
+//}
+//
+//template<typename R, typename... Args>
+//struct testcallback
+//{
+//	string c;
+//	R (*func)(Args... args);
+//};
+//
+//testcallback<int, string, uint, long> testCallBack[] =
+//{
+//	{ "1", test1 },
+//	{ "2", test2 },
+//	{ "3", test3 }
+//};
+//
+
 
 void testFactory()
 {
@@ -77,22 +202,11 @@ bool testInputClass(HINSTANCE hinst, HWND hwnd)
 	//Input has to be with hinstance and hwnd??? yes.
 }
 
-int testTabWindow()
-{
-	TabWindow* tabWindow = new TabWindow();
-
-	tabWindow->displayWindow();
-	tabWindow->run();
-
-	return 0;
-}
-
 
 int main()
 {
-	////test();
+	//test();
 	////testFactory();
-	//testTabWindow();
 
 	//std::thread t = std::thread(createNode, 3);
 	TDManager* td_Manager = TDSingleton<TDManager>::getInstance();
