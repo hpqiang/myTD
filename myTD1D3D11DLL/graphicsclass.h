@@ -1,30 +1,14 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: graphicsclass.h
-////////////////////////////////////////////////////////////////////////////////
-#ifndef _GRAPHICSCLASS_H_
-#define _GRAPHICSCLASS_H_
-
-
-//////////////
-// INCLUDES //
-//////////////
-//#include <windows.h>
-//#include "nodeWindow.h"  //Don't include this
+#pragma once
 
 #include "d3dclass.h"
 #include "cameraclass.h"
 #include "modelclass.h"
 #include "textureshaderclass.h"
 
-/////////////
-// GLOBALS //
-/////////////
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = false;// true;
 const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
-
-
 
 //Temp for myD3DConnectionOP
 //Q: Make this and other corresponding struct to be shared memory???
@@ -53,12 +37,9 @@ typedef struct GeometryOP
 public:
 	GeometryOP()
 	{
-
 	}
-	//GeometryOP(const GeometryOP& c) {}
 	~GeometryOP()
 	{
-
 	}
 
 	myRotation getRotation()
@@ -136,15 +117,6 @@ struct __declspec(dllexport) myD3DConnectionOP
 	PTextureOP	myTextureOP;
 };
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Class name: GraphicsClass
-////////////////////////////////////////////////////////////////////////////////
-//extern struct myD3DConnectionOP; //forward declaration
-//#include "../myTD1NodeDLL/NodeWin.h"
-// /*extern*/ struct __declspec(dllimport) myD3DConnectionOP;
-//#include "../myMain/DefineCommon.h"
-
 //To do: Make GraphicsClass a base class????
 class __declspec(dllexport) GraphicsClass
 {
@@ -169,5 +141,3 @@ private:
 	ModelClass* m_Model;
 	TextureShaderClass* m_TextureShader;
 };
-
-#endif

@@ -1,7 +1,6 @@
 #include "NodeWin.h"
 #include "TDSingleton.h"
 #include "TDManager.h"
-#include "NodeOPD3D.h"
 
 bool NodeWin::m_isInitialized = false;
 string NodeWin::m_ClassName = "nodeWinClass";
@@ -9,7 +8,6 @@ string NodeWin::m_ClassName = "nodeWinClass";
 //To do: should use the one in rootWindow.cpp????
 void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
 {
-	//cout << __FUNCTION__ << endl;
 	POINT point;
 	HMENU hMenu;
 	HMENU hSubMenu;
@@ -39,7 +37,6 @@ void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
 
 LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	static bool bCanDrawLine = false;
 	static HWND prevH = nullptr; 
 	static TDManager::myEvent prevEvent, curEvent;
 	TDManager* td_Manager = nullptr;
@@ -47,7 +44,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 	switch (umsg)
 	{
-		//// Check if the window is being closed.
+	//// Check if the window is being closed.
 	case WM_CLOSE:
 	{
 		cout << "closing..." << endl;
@@ -56,47 +53,51 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 		nM->removeNode(hwnd);
 		td_Manager->removeFromTo(hwnd);
+		// To do: destroy property window if this node win is an OP win
 
 		DestroyWindow(hwnd);
-//		td_Manager->DrawConnections();
+		td_Manager->DrawConnections();
 
 		return 0;
 	}
+	case WM_ENTERSIZEMOVE:
+	{
+		td_Manager = TDSingleton<TDManager>::getInstance();
+		NodeManager* nM = td_Manager->getNodeManager();
+		Node *curNode = nM->findNode(hwnd);
+
+		curNode->drawConnection(true, true);
+
+		return 0;
+	}
+
 	case WM_MOVE:
 	{
-		if (!bCanDrawLine)
-		{
-			cout << "Not an actual move..." << endl;
-			return 0;
-		}
-
-		curEvent.event = 0; //Q: Is ths event important here?
-		curEvent.command = "Node Window Moved";
-		curEvent.hwnd = hwnd;
-		curEvent.wparam = wparam;
-		curEvent.lparam = lparam;
-
 		td_Manager = TDSingleton<TDManager>::getInstance();
-		td_Manager->sendEvent(curEvent);
+		NodeManager* nM = td_Manager->getNodeManager();
 
-		prevEvent = {};
+		Node *curNode = nM->findNode(hwnd);
+
+		if (curNode != nullptr)
+			curNode->drawConnection(true, false);
 
 		break;
 	}
 	case WM_SIZE:
 	{
+		td_Manager = TDSingleton<TDManager>::getInstance();
+		NodeManager* nM = td_Manager->getNodeManager();
+
+		Node *curNode = nM->findNode(hwnd);
+
+		if (curNode != nullptr)
+			curNode->drawConnection(true, false);
+
 		break;
 	}
 	case WM_LBUTTONDOWN:
 	{
-
 		prevH = hwnd;
-
-		prevEvent.event = 0; //Q: Is ths event important here?
-		prevEvent.command = "Prepare Draw Line";
-		prevEvent.hwnd = hwnd;
-		prevEvent.wparam = wparam;
-		prevEvent.lparam = lparam;
 
 		break;
 	}
@@ -108,31 +109,17 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 			return 0;
 		}
 
-		bCanDrawLine = true;
-		curEvent.event = 0; //Q: Is ths event important here?
-		curEvent.command = "Draw Line";
-		curEvent.hwnd = hwnd;
-		curEvent.wparam = wparam;
-		curEvent.lparam = lparam;
-
-		RECT startRECT;
-		RECT endRECT;
-
-		GetWindowRect(prevEvent.hwnd, &startRECT);
-		GetWindowRect(hwnd, &endRECT);
-
-		cout << "Before sending: From " << prevEvent.hwnd << "To: " << hwnd << endl;
-		cout << " startRECT: " << startRECT.right <<
-			": " << startRECT.top << endl;
-		cout << "                end RECT: " << endRECT.left <<
-			": " << endRECT.bottom << endl;
-
 		td_Manager = TDSingleton<TDManager>::getInstance();
-		td_Manager->sendEvent(prevEvent);
-		td_Manager->sendEvent(curEvent);
+		NodeManager* nM = td_Manager->getNodeManager();
 
-		prevEvent = {}; //Q: Not necessary since both prevEvent and curEvent had been consumed???
-		curEvent = {};
+		Node *prevNode = nM->findNode(prevH);
+		Node *curNode = nM->findNode(hwnd);
+
+		//To do: If there is already a connection, don't do below
+		prevNode->addNodeOut(curNode);
+		curNode->addNodeIn(prevNode);
+
+		curNode->drawConnection(true, false);
 
 		break;
 	}
@@ -171,17 +158,6 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 		break;
 	}
-	//case 1000:
-	case WM_NOTIFY:
-	{
-		//Q: Should have a derived class WndProc???
-		memcpy(m_OP3DGeometry, (PGeometryOP)lparam, wparam);
-
-		//cout << "rotX : " << m_OP3DGeometry->getRotation().m_Rx << "\t";
-		//cout << "rotY : " << m_OP3DGeometry->getRotation().m_Ry << "\t";
-		//cout << "rotZ : " << m_OP3DGeometry->getRotation().m_Rz << endl;
-		break;
-	}
 	}
 	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
@@ -189,10 +165,8 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 NodeWin::NodeWin()
 	: m_Style(0), m_hwnd(nullptr), m_isContainer(false)
 	, m_isSelected(false), m_isCurrent(false)
-	, m_Input(nullptr)
 
 {
-	m_OP3DGeometry = new GeometryOP();
 	Initialize();
 }
 
@@ -233,12 +207,6 @@ int NodeWin::Initialize()
 
 void NodeWin::DeInitialize()
 {
-	if (m_Input)
-	{
-		delete m_Input;
-		m_Input = nullptr;
-	}
-
 	// Remove the window.
 	DestroyWindow(m_hwnd);
 	m_hwnd = NULL;
@@ -254,8 +222,8 @@ int NodeWin::createWindow(HWND parentHwnd, const string& title)
 
 	// Create the node window. 
 	m_hwnd = CreateWindowEx(
-		0,                      // no extended styles           
-		m_ClassName.c_str(),            // class name                   
+		0,							// no extended styles           
+		m_ClassName.c_str(),        // class name                   
 		title.c_str(),				// window name                  
 		WS_CHILD | WS_BORDER
 		| WS_CAPTION
@@ -283,42 +251,4 @@ bool NodeWin::displayWindow()
 	ShowWindow(m_hwnd, SW_SHOW);
 
 	return true;
-}
-
-bool NodeWin::createInputObject()
-{
-	m_Input = new InputClass;
-	if (!m_Input)
-	{
-		return false;
-	}
-
-	// Initialize the input object.
-	//m_Input->Initialize();
-	return true;
-}
-
-
-//To do: This function should be in NodeWinD3DGeometry and other derived classes
-void NodeWinD3D::getD3DConnectionOP(myD3DConnectionOP *op)
-{
-	TDManager* tM = TDSingleton<TDManager>::getInstance();
-	NodeManager* nM = tM->getNodeManager();
-	NodeWin*	nW = nullptr;
-	//step1: find all From windows connected to this window
-	HWND *hwndFrom = new HWND[5]; //temp: Assuming no more than 5 connections
-	int foundNum = 0;
-
-	if (tM->findFrom(m_hwnd, hwndFrom, &foundNum) != false)
-	{
-		//cout << "found From number is: " << foundNum << endl;
-		//step2: find the node window associate with hwndFrom
-
-		for (int i = 0; i < foundNum; i++)
-		{
-			nW = nM->getObjectByHwnd(hwndFrom[i]);
-			//Temp: call NodeOPD3D's method directly, should eliminate dynamic cast
-			dynamic_cast<NodeOPD3D *>(nW)->getD3DConnectionOP(m_D3DConnectionOP);
-		}
-	}
 }

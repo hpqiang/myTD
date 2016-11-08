@@ -1,7 +1,9 @@
 #pragma once
 
 #include "NodeWin.h"
-#include "NodeOPD3D.h"
+//#include "inputclass.h"
+#include "graphicsclass.h"
+//#include "NodeOPD3D.h"
 
 //class IPropertyWin
 //{

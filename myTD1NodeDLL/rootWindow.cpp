@@ -3,73 +3,6 @@
 #include "TDManager.h"
 #include "rootWindow.h"
 
-//Q: Error moving below menu defs to rootWindow.h???
-typedef struct Menu
-{
-	uint id;
-	const char* menuTitle;
-}PMenu;
-
-typedef struct MenuItem
-{
-	uint menuId;
-	uint id;
-	const char * menuItemTitle;
-	string command;
-}PMenuItem;
-
-Menu mainMenu[] =
-{
-	{ 1, "&File" },
-	{ 2, "&Edit" },
-	{ 3, "&Window" },
-	{ 4, "&Help" },
-	{ 5, "&Quit" }
-};
-
-MenuItem mainMenuItem[] =
-{
-	{ 1, 1, "&New", "" },
-	{ 1, 2, "&Load", "" },
-	{ 1, 3, "&Save", "" },
-	{ 1, 4, "Save &As...","" },
-	{ 1, 0, NULL, "" },
-	{ 1, 6, "&Quit","" },
-
-	{ 2, 1, "&Cut","" },
-	{ 2, 2, "&Copy","" },
-	{ 2, 3, "&Paste","" },
-
-	{ 3, 1, "&Python","" },
-	{ 3, 2, "&Text","" },
-	{ 3, 3, "&Table","" },
-
-	{ 4, 1, "&About","" },
-	{ 4, 2, "&Help","" },
-};
-
-//Note: ids have to be unique
-Menu popUpMenu[] =
-{
-	{ 101, "&Node Win" },
-	{ 102, "&Node OP" },
-};
-
-MenuItem popUpMenuItem[] =
-{
-	{ 101, 201, "&2D Win","" },
-	{ 101, 202, "&D3D Win","Create Node Win D3D" },
-	{ 101, 203, "&OGL Win","" },
-	{ 101, 204, "&Audio Win","" },
-	{ 101, 205, "&Video Win","" },
-	{ 101, 205, "&Camera Win","" },
-
-	{ 102, 301, "&2D OP","" },
-	{ 102, 302, "&D3D OP","Create Node OP D3D" },
-	{ 102, 303, "&OGL OP","" },
-	{ 102, 304, "&Camera OP","" },
-};
-
 //HPQ: refer to http://zetcode.com/gui/winapi/menus/
 void AddMenu(HWND hwnd)
 {
@@ -94,6 +27,8 @@ void AddMenu(HWND hwnd)
 		AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hMenu, mainMenu[i].menuTitle);
 	}
 	SetMenu(hwnd, hMenubar);
+
+	//To do: How to track which menu item is clicked?
 }
 
 void createPopUpMenu(HWND hwnd, LPARAM lParam)

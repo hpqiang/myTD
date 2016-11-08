@@ -2,7 +2,7 @@
 
 NodeManager::NodeManager()
 {
-	m_Nodes.clear();  //Q: Why doing this here?
+	m_Nodes.clear();
 }
 NodeManager::~NodeManager()
 {
@@ -11,19 +11,32 @@ NodeManager::~NodeManager()
 }
 
 // to do : add CRUD for Node handling
-
-void NodeManager::addNode(INode* node)
+void NodeManager::addNode(Node* node)
 {
 	m_Nodes.push_back(node);
 }
 
+Node* NodeManager::findNode(HWND hwnd)
+{
+	list<Node *>::iterator it;
+	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+	{
+		NodeWin *nW = (*it)->getNodeWin();
+		if ( nW->getNodeWinHandle() == hwnd )
+		{
+			return (*it);
+		}
+	}
+	return nullptr;
+}
+
 void NodeManager::removeNode(HWND hwnd)
 {
-	list<INode *>::iterator it;
+	list<Node *>::iterator it;
 
-	for (it = m_Nodes.begin(); it != m_Nodes.end(); ) //; it++)
+	for (it = m_Nodes.begin(); it != m_Nodes.end(); )
 	{
-		NodeWin* node = dynamic_cast<NodeWin *>(*it);
+		NodeWin* node = (*it)->getNodeWin();
 		if (node->getNodeWinHandle() == hwnd)
 		{
 			//To do: Delete inner pointers
@@ -41,59 +54,28 @@ uint NodeManager::getNodesSize()
 	return m_Nodes.size();
 }
 
-NodeWin* NodeManager::findNodeAt(int idx)
+int NodeManager::drawConnections()
 {
-	list<INode *>::iterator it;
-	int i = 0;
+	list<Node *>::iterator it;
 
 	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
 	{
-		if (i == idx)
-		{
-			NodeWin* node = dynamic_cast<NodeWin *>(*it);
-			return node;
-		}
-		else
-			i++;
+		(*it)->drawConnection(false, false);
 	}
-	cout << "Did not find the INode* with idx" << endl;
-	return nullptr;
-}
 
-NodeWin* NodeManager::getObjectByHwnd(HWND hwnd)
-{
-	list<INode *>::iterator it;
-	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
-	{
-		NodeWin *node = dynamic_cast<NodeWin *>(*it);
-		if (node->getNodeWinHandle() == hwnd)
-		{
-			return node;
-		}
-	}
-	cout << "Did not find the Inode with hwnd" << endl;
-	return nullptr;
+	return 1;
 }
 
 void NodeManager::Render()
 {
 	if (m_Nodes.empty())
 		return;
-	list<INode *>::iterator it;
+	list<Node *>::iterator it;
 
 	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
 	{
-		//To do: eliminate the dynamic_cast
-		dynamic_cast<NodeWin *>(*it)->Render();
+		Content *content = (*it)->getContent();
+		if (content != nullptr)  //Temp
+			content->Render(0);
 	}
-}
-
-bool NodeManager::isConnectable(INode* nodeFrom, INode* nodeTo)
-{
-	return true;
-}
-
-bool NodeManager::detectNodeLoop()
-{
-	return true;
 }

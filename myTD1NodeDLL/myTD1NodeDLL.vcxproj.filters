@@ -18,13 +18,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CommonDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inputclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDFactory.h">
@@ -36,28 +30,10 @@
     <ClInclude Include="TDManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Content.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="rootWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NodeWin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeOP3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeOP2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeOPD3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeOPOGL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeOP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PropertyWin.h">
@@ -66,17 +42,11 @@
     <ClInclude Include="NodeManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ContentManager.h">
+    <ClInclude Include="Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="inputclass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -95,7 +65,7 @@
     <ClCompile Include="TDSingleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ContentManager.cpp">
+    <ClCompile Include="Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

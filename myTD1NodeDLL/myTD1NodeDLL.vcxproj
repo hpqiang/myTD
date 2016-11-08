@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXSDK_DIR)\Include;C:\Users\lcuser\Documents\Visual Studio 2015\Projects\myTD\myTD1D3D11DLL;$(IncludePath)</IncludePath>
+    <IncludePath>$(DXSDK_DIR)\Include;$(SolutionDir)myTD1D3D11DLL;$(SolutionDir)myTD1ContentDLL;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(SolutionDir)\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -149,18 +149,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ContentManager.h" />
-    <ClInclude Include="NodeManager.h" />
-    <ClInclude Include="NodeOP2D.h" />
-    <ClInclude Include="NodeOP3D.h" />
-    <ClInclude Include="CommonDefs.h" />
-    <ClInclude Include="Content.h" />
-    <ClInclude Include="NodeOPD3D.h" />
-    <ClInclude Include="inputclass.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="NodeManager.h" />
+    <ClInclude Include="CommonDefs.h" />
     <ClInclude Include="NodeWin.h" />
-    <ClInclude Include="NodeOPOGL.h" />
-    <ClInclude Include="NodeOP.h" />
     <ClInclude Include="PropertyWin.h" />
     <ClInclude Include="rootWindow.h" />
     <ClInclude Include="TDFactory.h" />
@@ -168,8 +160,6 @@
     <ClInclude Include="TDSingleton.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ContentManager.cpp" />
-    <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="NodeManager.cpp" />
     <ClCompile Include="NodeWin.cpp" />
@@ -179,8 +169,8 @@
     <ClCompile Include="TDSingleton.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\myTD1D3D11DLL\myTD1D3D11DLL.vcxproj">
-      <Project>{8be83c28-ebef-48c9-98e5-ef008275793e}</Project>
+    <ProjectReference Include="..\myTD1ContentDLL\myTD1ContentDLL.vcxproj">
+      <Project>{beb8968d-6ac1-4a5d-9886-7c5209fdd03e}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,51 +3,28 @@
 #include "TDManager.h"
 #include "rootWindow.h"
 
+#include "Node.h"
 #include "NodeWin.h"
-#include "NodeOPD3D.h"
 #include "PropertyWin.h"
 
+#include "Content.h"
+#include "ContentD3D.h"
+
 TDManager::TDManager()
-	:m_NodeManager(nullptr), m_ContentManager(nullptr)
+	:m_NodeManager(nullptr)
 	, m_RootWindow(nullptr)
 {
-	m_Node_Contents.clear();
 	m_NodeManager = TDSingleton<NodeManager>::getInstance();
-	m_ContentManager = TDSingleton<ContentManager>::getInstance();
 }
 
 TDManager::~TDManager()
 {
-	cout << "calling " << __FUNCTION__ << endl;
 	if (m_NodeManager)
 	{
 		delete m_NodeManager;
 		m_NodeManager = nullptr;
 	}
-	if (m_ContentManager)
-	{
-		delete m_ContentManager;
-		m_ContentManager = nullptr;
-	}
-
-	for (map<INode*, IContent*>::iterator it = m_Node_Contents.begin();
-		it != m_Node_Contents.end(); ++it)
-	{  //HPQ: To do later
-		////if ((*it).second.size() > 0)
-		//{
-		//	for (IContent* l : it->second)
-		//		if (l)
-		//		{
-		//			delete l;
-		//		}
-		//	(*it).second.clear();
-		//	it++; //Q: Necessary? 
-		//}
-		//else
-		//	it++;
-	}
-	m_Node_Contents.clear();
-
+	
 	if (m_RootWindow)
 	{
 		delete m_RootWindow;
@@ -57,9 +34,9 @@ TDManager::~TDManager()
 
 bool TDManager::createRootWindow()
 {
-	m_RootWindow = new RootWindow(); //to do: use factory pattern
+	m_RootWindow = TDSingleton<RootWindow>::getInstance();
 
-	return TRUE;
+	return true;
 }
 
 RootWindow* TDManager::getRootWindow()
@@ -67,7 +44,6 @@ RootWindow* TDManager::getRootWindow()
 	return m_RootWindow;
 }
 
-//Q: By luck, this function is not called yet, otherwise, needs to put into .h?
 template<class T>
 int TDManager::createNodeWin(HWND hwnd, const string& title)
 {
@@ -87,22 +63,97 @@ int TDManager::createNodeWin(HWND hwnd, const string& title)
 	return 1;
 }
 
+int TDManager::createNewNodeWin(HWND hwnd, const string& title)
+{
+	//step1: create and display the node window
+	Node *n = new Node();
+	NodeWin* nW = new NodeWin();
+	//Note: Content should be decided later
+
+	nW->createWindow(hwnd, title);
+	nW->displayWindow();  //Q: Should nW display it OR let NodeManager to display?OR let TDManager to display????
+	
+	n->setNodeWin(nW);
+	
+	//step2: add this node window to NodeManager
+	m_NodeManager = TDSingleton<NodeManager>::getInstance();
+	m_NodeManager->addNode(n);
+
+	return 1;
+}
+
+//int TDManager::loadContentD3DScene(HWND hwnd, const string& title)
+template<class T>
+int TDManager::loadContent(HWND hwnd, const string& title)
+{
+	//step1: find the suitable node window
+	Node *n = m_NodeManager->findNode(hwnd);
+	if (n == nullptr)
+	{
+		cout << "No Node found!!!!" << endl;
+		return -1;
+	}
+	
+	//step2: set content
+	//Content *content = new Content();
+	//Content *content = new ContentD3D();
+	Content *content = new T();
+	content->createInputObject();
+	content->createGraphicsObject(hwnd);
+
+	n->setContent(content);
+
+	return 1;
+}
+
 //Q: Temp: Take this NodeWinD3D as NodeWinD3DGeometry for now 
 /*static */int TDManager::createNodeWinD3D(void *this_Ptr, string s, myEvent e)
 {
-	//Q: Jesus, took me so long to find this! 
-	//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
-	TDManager* self = (TDManager *)this_Ptr;
+	////Q: Jesus, took me so long to find this! 
+	////refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
+	//TDManager* self = (TDManager *)this_Ptr;
 
-	self->createNodeWin<NodeWinD3D>(e.hwnd, "NodeWinD3DGeometry");
+	//self->createNodeWin<NodeWinD3D>(e.hwnd, "NodeWinD3DGeometry");
 	return 1;
 }
 
 /*static */int TDManager::createNodeOPD3D(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 {
+	//TDManager* self = (TDManager *)this_Ptr;
+
+	//self->createNodeWin<NodeOPD3D>(e.hwnd, "NodeOPD3D");
+
+	return 1;
+}
+
+/*static */int TDManager::createNewNodeWin(void *this_Ptr, string s, myEvent e)
+{
+	//refer to first answer at : http://stackoverflow.com/questions/400257/how-can-i-pass-a-class-member-function-as-a-callback
 	TDManager* self = (TDManager *)this_Ptr;
 
-	self->createNodeWin<NodeOPD3D>(e.hwnd, "NodeOPD3D");
+	self->createNewNodeWin(e.hwnd, "NodeWin"); 
+	return 1;
+}
+
+/*static */int TDManager::loadD3DScene(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+{
+	//load the scene. To do: Replace the NodeWin title?
+	TDManager* self = (TDManager *)this_Ptr;
+
+	//self->loadContentD3DScene(e.hwnd, "Default D3D Scene");
+	self->loadContent<ContentD3D>(e.hwnd, "Default D3D Scene");
+
+	return 1;
+}
+
+/*static */int TDManager::loadD3DOPGeometry(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
+{
+	////step1: load the OP scene
+	TDManager* self = (TDManager *)this_Ptr;
+
+	//self->loadContent<ContentD3DGeometry>(e.hwnd, "Default D3D Geometry");
+	//step2: create property window
+
 
 	return 1;
 }
@@ -170,8 +221,8 @@ void TDManager::processEvent()
 	std::lock_guard<mutex> lck(m_QueueMutex); //Q: What's wrong if using unique_lock?
 											  //lck.lock();
 	myEvent e = m_Events.front(); //Q: if usiing myEvent&, then side effect????
-	cout << "event:  " << e.event << " is poped" << endl;
-	cout << "e.command is : " << e.command.c_str() << endl;
+	//cout << "event:  " << e.event << " is poped" << endl;
+	//cout << "e.command is : " << e.command.c_str() << endl;
 	m_Events.pop();
 	//lck.unlock();
 
@@ -228,7 +279,7 @@ int TDManager::DrawConnections()
 {
 	list<myConnLine *>::iterator it;
 
-	cout << "Connection number: " << m_Connections.size() << endl;
+	//cout << "Connection number: " << m_Connections.size() << endl;
 	if (m_Connections.size() == 0)
 	{
 		return 0;
@@ -246,7 +297,7 @@ int TDManager::deleteSelectedLines()
 {
 	list<myConnLine *>::iterator it;
 
-	for (it = m_Connections.begin(); it != m_Connections.end(); )//it++)
+	for (it = m_Connections.begin(); it != m_Connections.end(); )
 	{
 		cout << "(*it)->isSelected" << (*it)->isSelected << endl;
 
@@ -257,10 +308,8 @@ int TDManager::deleteSelectedLines()
 			delete (*it)->myLine.second.x;
 			delete (*it)->myLine.second.y;
 			m_Connections.erase(it++);
-
-			cout <<  "*************changing size : " << m_Connections.size() << endl;
-
 			//it = m_Connections.erase(it); //to test out. 
+			//cout <<  "*************changing size : " << m_Connections.size() << endl;
 		}
 		else
 		{
@@ -268,10 +317,7 @@ int TDManager::deleteSelectedLines()
 		}
 	}
 
-	cout << __FUNCTION__ << "size : " << m_Connections.size() << endl;
-
 	return 1;
-
 }
 
 int TDManager::removeFromTo(HWND hwnd)
@@ -304,7 +350,7 @@ int TDManager::removeFromTo(HWND hwnd)
 		}
 	}
 
-	cout << "In loop with numFrom= " << numFrom << "\t numTo= " << numTo << endl;
+	//cout << "In loop with numFrom= " << numFrom << "\t numTo= " << numTo << endl;
 	deleteSelectedLines();
 
 	return 1;
@@ -318,7 +364,7 @@ void TDManager::processEachEvent(const myEvent& e)
 	{
 		if (e.command == Command_Callback[i].command)
 		{
-			int x = (*(Command_Callback[i].func))(this, "This is a test string", e);
+			int x = (*(Command_Callback[i].func))(this, "test string", e);
 		}
 	}
 }
@@ -326,15 +372,6 @@ void TDManager::processEachEvent(const myEvent& e)
 /*static*/ int TDManager::createPropertyWinD3DGeometry(void * this_Ptr, string s, myEvent e)//, myEvent *e, uint numOfEvents)
 {
 	TDManager* self = (TDManager *)this_Ptr;
-	//Q: Why rW is nullptr below????
-	//RootWindow* rW = self->getRootWindow();
-	//if (rW == nullptr)
-	//{
-	//	cout << "What? RootWindow pointer null????" << endl;
-	//	return -1;
-	//}
-	//HWND parentHwnd = rW->getHwnd();
-	//Q: Temp walkaround....
 	HWND parentHwnd = GetParent(e.hwnd);
 
 	self->createPropertyWin<PropertyWinD3DOPGeometry>(parentHwnd, e.hwnd, "D3DGeometry");
@@ -354,6 +391,7 @@ void TDManager::processEachEvent(const myEvent& e)
 /*static*/ int TDManager::prepareDrawLine(void * this_Ptr, string s, myEvent e)
 {
 	TDManager* self = (TDManager *)this_Ptr;
+	
 	self->m_PrevEvent = e;
 
 	return 1;
@@ -405,7 +443,6 @@ void TDManager::processEachEvent(const myEvent& e)
 
 	//self->m_PrevEvent = *(myEvent *)nullptr;
 	self->m_PrevEvent.hwnd = nullptr;  //Temp
-
 
 	return 1;
 }

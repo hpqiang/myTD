@@ -6,11 +6,32 @@
 #include "NodeManager.h"
 #include "ContentManager.h"
 
+template<typename R, typename... Args>
+struct myCommand_Callback
+{
+	string command;
+	R(*func)(Args... args);  //Q: What's this all about? 
+};
+
+//struct myEvent1
+//{
+//	int a;
+//	float b;
+//};
+//int add(void *this_Ptr, string s, myEvent1 e)
+//{
+//
+//}
+//myCommand_Callback<int, void *, string, myEvent1>
+//Command_Callback1[] =
+//{
+//	{ "Create Node Win D3D", add },  
+//};
+
 //For LNK2005 error, add /FORCE:MULTIPLE in linker option: http://stackoverflow.com/questions/10046485/error-lnk2005-already-defined
 //Q: Cannot be inside the TDManager class def? 
 //Q: Callback funcs and shared_ptr???
 //Q: For Input, to depend on DirectInput8 only????
-//Q: Which class should be __declspec(dllexport) ???
 //To do: Be a central point? Use Observer?
 class __declspec(dllexport) TDManager
 {
@@ -39,24 +60,27 @@ public:
 		int		style; //etc....
 	};
 
-	template<typename R, typename... Args>
-	struct myCommand_Callback
-	{
-		string command;
-		R(*func)(Args... args);  //Q: What's this all about? 
-	};
+	//template<typename R, typename... Args>
+	//struct myCommand_Callback
+	//{
+	//	string command;
+	//	R(*func)(Args... args);  //Q: What's this all about? 
+	//};
 
 	//Q: Why 1 or other number is necessary here? Why cannot be static?
 	//Q: Strange... Refer to test() in main.cpp for simple consideration, still strange....
-	/*static*/ TDManager::myCommand_Callback<int, void *, string, TDManager::myEvent> 
-		Command_Callback[6] =
+	/*static*/const /*TDManager::*/myCommand_Callback<int, void *, string, TDManager::myEvent> 
+		Command_Callback[8] =
 	{
 		// Events: creating 'first-level' windows
 		{ "Create Node Win D3D", TDManager::createNodeWinD3D },  //Temp: This NodeWinD3D should be NodeWinD3DGeometry?
 		{ "Create Node OP D3D", TDManager::createNodeOPD3D },
+		{ "New Node Win", TDManager::createNewNodeWin },
 
 		// Events: creating a property window
-		{ "D3D Geometry", TDManager::createPropertyWinD3DGeometry },
+		{ "D3D Scene", TDManager::loadD3DScene },
+		//{ "D3D Geometry", TDManager::createPropertyWinD3DGeometry },
+		{ "D3D Geometry", TDManager::loadD3DOPGeometry },
 
 		// Events: Node window status update
 		
@@ -96,17 +120,17 @@ public:
 	int deleteSelectedLines();
 
 	int removeFromTo(HWND hwnd);
-	// to do:add CRUD for Node handling
-//protected:
-	//Q: One class can have one thread? No, each object can.
-	// Not each object? Using this as above t2
-	// what is return value used? Not known yet
-
-	////Q: To do: registration pattern? refer to : http://stackoverflow.com/questions/1096700/instantiate-class-from-name
+protected:
+	//Q: To do: registration pattern? refer to : http://stackoverflow.com/questions/1096700/instantiate-class-from-name
 	void processEachEvent(const myEvent& e);
 
 	template<class T>
 	int createNodeWin(HWND hwnd, const string& title);
+
+	int createNewNodeWin(HWND hwnd, const string& title);
+	//int loadContentD3DScene(HWND hwnd, const string& title);
+	template<class T>
+	int loadContent(HWND hwnd, const string& title);
 
 	template<class T>
 	int createPropertyWin(HWND parentHwnd, HWND sourceNodeHwnd, const string& title)
@@ -143,7 +167,10 @@ public:
 	//Q: Temp: Take this NodeWinD3D as NodeWinD3DGeometry for now 
 	static int createNodeWinD3D(void *this_Ptr, string s, myEvent e);
 	static int createNodeOPD3D(void * this_Ptr, string s, myEvent e);
+	static int createNewNodeWin(void * this_Ptr, string s, myEvent e);
 	static int createPropertyWinD3DGeometry(void * this_Ptr, string s, myEvent e);
+	static int loadD3DScene(void * this_Ptr, string s, myEvent e);
+	static int loadD3DOPGeometry(void * this_Ptr, string s, myEvent e);
 
 	static int nodeWinMove(void * this_Ptr, string s, myEvent e);
 
@@ -157,14 +184,10 @@ public:
 
 private:
 	NodeManager*	m_NodeManager;
-	ContentManager* m_ContentManager;
-	map<INode*, IContent*> m_Node_Contents; //One to One only?
-	mutex	m_Mutex;
-	condition_variable m_CondVar;
 
 	list<myConnLine *> m_Connections; //Q: Also serve as a mediator???
-
 	mutex	m_MutexConnection;
+
 	myEvent		m_PrevEvent;
 
 	queue<myEvent>  m_Events;
@@ -172,6 +195,4 @@ private:
 	//condition_variable m_QueueCondVar;
 
 	RootWindow*		m_RootWindow;
-	//Q: InputClass: one total or each for a nodewin?
-	//InputClass*		m_Input;   //Temp: use DirectInput8 for now, this one for root window
 };

@@ -1,20 +1,32 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: inputclass.h
-////////////////////////////////////////////////////////////////////////////////
+//#pragma once
+//
+//class __declspec(dllexport) InputClass
+//{
+//public:
+//	InputClass();
+//	InputClass(const InputClass&);
+//	~InputClass();
+//
+//	void Initialize();
+//
+//	void KeyDown(unsigned int);
+//	void KeyUp(unsigned int);
+//
+//	bool IsKeyDown(unsigned int);
+//
+//private:
+//	bool m_keys[256];
+//};
+
 #pragma once
-//#ifndef _INPUTCLASS_H_
-//#define _INPUTCLASS_H_
-#define TDD3DLIBRARY_EXPORTS
 
-#ifdef TDD3DLIBRARY_EXPORTS
-#define TDD3DLIBRARY_API __declspec(dllexport) 
-#else
-#define TDD3DLIBRARY_API __declspec(dllimport) 
-#endif
+#define DIRECTINPUT_VERSION 0x0800
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: InputClass
-////////////////////////////////////////////////////////////////////////////////
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
+
+#include <dinput.h>
+
 class __declspec(dllexport) InputClass
 {
 public:
@@ -22,15 +34,27 @@ public:
 	InputClass(const InputClass&);
 	~InputClass();
 
-	void Initialize();
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
 
-	void KeyDown(unsigned int);
-	void KeyUp(unsigned int);
-
-	bool IsKeyDown(unsigned int);
+	void GetMouseLocation(int&, int&);
+	bool IsEscapePressed();
+	bool IsLeftMouseButtonDown();
 
 private:
-	bool m_keys[256];
-};
+	bool ReadKeyboard();
+	bool ReadMouse();
+	void ProcessInput();
 
-//#endif
+private:
+	IDirectInput8* m_directInput;
+	IDirectInputDevice8* m_keyboard;
+	IDirectInputDevice8* m_mouse;
+
+	unsigned char m_keyboardState[256];
+	DIMOUSESTATE m_mouseState;
+
+	int m_screenWidth, m_screenHeight;
+	int m_mouseX, m_mouseY;
+};

@@ -1,13 +1,12 @@
-// MathClient.cpp : Defines the entry point for the console application.
-// Compile by using: cl /EHsc /link MathLibrary.lib MathClient.cpp
-
 #include <iostream>
 //#include "myDLL.h"
 #include "inputclass.h"
-#include "Node.h"
+//#include "Node.h"
 #include "TDManager.h"
 #include "TDSingleton.h"
 #include "TDFactory.h"
+
+#include "main.h"
 
 //#include "NodeManager.h" //Q: Why need to include this here??
 
@@ -15,99 +14,89 @@
 
 using namespace std;
 
+int f3(int a, float b)
+{
+	return 1;
+}
+int f4(int a, float b)
+{
+	return 1;
+}
+
+struct X
+{
+	int a;
+	float b;
+	double c;
+};
+
+class A
+{
+public:
+	static int i;
+
+	//const /*static*/ X x[] =
+	//{
+	//	{ 1, 3.3f, 4.4f },
+	//	{ 2, 6.6f, 6.6f },
+	//};
+
+	//void printx()
+	//{
+	//	cout << sizeof(x) / sizeof(x[0]) << endl;
+	//}
+	//template<class T>
+	//class Z
+	//{
+	//	int a;
+	//	T* t;
+	//};
+
+
+	//Z<A> z[] =
+	//{
+	//	{1},
+	//	{2},
+	//};
+
+
+	//template<typename T, typename... Args>
+	//class YY
+	//{
+	//	int a;
+	//	string b;
+	//	T(*func)(Args...args);
+	//};
+
+	//A::YY<int, void *, int, string> yy[] =  //Q: YY is not a template here???
+	//{
+	//	{1, "Mike", f1},
+	//	{2, "Qiang", f2},
+	//};
+
+	//static int f1(int a, string b)
+	//{
+	//	return 1;
+	//}
+
+	//static int f2(int a, string b)
+	//{
+	//	return 1;
+	//}
+};
+
+
 void test()
 {
-	//struct C
-	//{
-	//	int a;
-	//	float b;
-	//};
-
-	//C c[]=
-	//{
-	//	{1, 1.1f},
-	//	{2, 2.2f},
-	//	{3, 3.3f},
-	//};
-
-	//template<typename R, typename... Args>
-	//struct D
-	//{
-	//	int a;
-	//	float b;
-	//	R (*func)(Args... args);
-	//};
-
-	//D<int, int, string, string> d[] =
-	//{
-	//	{1, 1.1f, f1},
-	//	{2, 2.2f, f2},
-	//};
-
-	//int f1(int a, float b)
-	//{
-	//	return 1;
-	//}
-	//int f2(int a, float b)
-	//{
-	//	return 1;
-	//}
-
-	//class A
-	//{
-	//public:
-	//	struct X
-	//	{
-	//		int a;
-	//		float b;
-	//		double c;
-	//	};
-
-	//	X x[2] = 
-	//	{
-	//		{1, 3.3f, 4.4f},
-	//		{2, 6.6f, 6.6f}
-	//	};
-
-	//	template<class T>
-	//	class Z
-	//	{
-	//		int a;
-	//		T* t;
-	//	};
+	D<int, int, float> d[] =
+	{
+		{ 1, 1.1f, f1},
+		{ 2, 2.2f, f2 },
+		{ 3, 3.3f, f3 },
+		{ 4, 4.4f, f4 },
+	};
 
 
-	//	Z<A> z[] =
-	//	{
-	//		{1},
-	//		{2},
-	//	};
-
-
-	//	template<typename T, typename... Args>
-	//	class YY
-	//	{
-	//		int a;
-	//		string b;
-	//		T(*func)(Args...args);
-	//	};
-
-	//	A::YY<int, void *, int, string> yy[] =  //Q: YY is not a template here???
-	//	{
-	//		{1, "Mike", f1},
-	//		{2, "Qiang", f2},
-	//	};
-
-	//	static int f1(int a, string b)
-	//	{
-	//		return 1;
-	//	}
-
-	//	static int f2(int a, string b)
-	//	{
-	//		return 1;
-	//	}
-	//};
 
 	//double a = 7.4;
 	//int b = 99;
@@ -155,10 +144,10 @@ void test()
 
 void testFactory()
 {
-	TDFactory<Node> *f = new TDFactory<Node>();
-	Node* n = f->getInstance();
+	//TDFactory<Node> *f = new TDFactory<Node>();
+	//Node* n = f->getInstance();
 
-	delete n;
+	//delete n;
 }
 
 bool testInputClass(HINSTANCE hinst, HWND hwnd)

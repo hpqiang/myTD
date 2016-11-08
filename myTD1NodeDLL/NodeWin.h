@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Node.h"
-#include "inputclass.h"
-#include "graphicsclass.h"
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
+#include "CommonDefs.h"
 
 typedef struct NodeMenu
 {
@@ -29,21 +31,21 @@ NodeMenuItem NodePopUpMenuItem[] =
 {
 	{ 301, 401, "&Load D3D Texture","D3D Load Texture" },
 	{ 301, 402, "&Load D3D Shader","D3D Load Shader" },
-	{ 301, 403, "&D3D Geometry","D3D Geometry" },
+	{ 301, 403, "&D3D Scene","D3D Scene" },
+	{ 301, 404, "&D3D Geometry","D3D Geometry" },
 
 	{ 302, 501, "&Load OGL Texture","OGL Load Texture" },
 	{ 302, 502, "&Load OGL Shader","OGL Load Shader" },
 	{ 302, 503, "&OGL Geometry","OGL Geometry" },
 };
 
-class __declspec(dllexport) NodeWin :public Node
+class __declspec(dllexport) NodeWin
 {
 public:
 
 public:
-	//To do: How to deal with WndProc?
 	NodeWin();
-	virtual ~NodeWin();
+	~NodeWin();
 
 	HWND getNodeWinHandle() const
 	{
@@ -54,13 +56,6 @@ public:
 
 	int createWindow(HWND, const string& title);
 	bool displayWindow();
-
-	bool createInputObject();
-
-	virtual void Render() = 0;
-
-	//To do: This pure virtual should be in NodeWinD3D
-	virtual void getD3DConnectionOP(myD3DConnectionOP *) = 0;
 
 protected:
 	int Initialize();
@@ -77,94 +72,4 @@ protected:
 	bool			m_isContainer;
 	bool			m_isSelected;
 	bool			m_isCurrent;
-
-	InputClass*		m_Input;
-	//Temp:
-	static PGeometryOP m_OP3DGeometry;
-
-};
-
-//Temp
-PGeometryOP NodeWin::m_OP3DGeometry = nullptr;
-
-class __declspec(dllexport) NodeWinD3D :public NodeWin
-{
-public:
-
-	NodeWinD3D() 
-	{
-		m_D3DConnectionOP = new myD3DConnectionOP();
-		//To do: for other component of m_D3DConnectionOP
-		m_D3DConnectionOP->myGeometryOP = new GeometryOP();
-		//Issue: Scale cannot be initialized to 0.0f, should be 1.0f
-		memset(m_D3DConnectionOP->myGeometryOP, 0.0f, sizeof(GeometryOP));
-	}
-	~NodeWinD3D() 
-	{
-		if (m_D3DConnectionOP->myGeometryOP != nullptr)
-		{
-			delete m_D3DConnectionOP->myGeometryOP;
-			m_D3DConnectionOP->myGeometryOP = nullptr;
-		}
-
-		if (m_D3DConnectionOP != nullptr)
-		{
-			delete m_D3DConnectionOP;
-			m_D3DConnectionOP = nullptr; 
-		}
-	}
-
-	bool createGraphicsObject()
-	{
-		bool result;
-
-		m_Graphics = new GraphicsClass();
-		if (!m_Graphics)
-		{
-			return false;
-		}
-
-		// Initialize the graphics object.
-		int w = GetSystemMetrics(SM_CXSCREEN);
-		int h = GetSystemMetrics(SM_CYSCREEN);
-		result = m_Graphics->Initialize(w, h, m_hwnd);
-		if (!result)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	virtual void Render() override
-	{
-		//int rot = 10;
-		//m_Graphics->Render(rot);
-		getD3DConnectionOP(m_D3DConnectionOP);
-		float rotX = m_D3DConnectionOP->myGeometryOP->getRotation().m_Rx;
-		float rotY = m_D3DConnectionOP->myGeometryOP->getRotation().m_Ry;
-		float rotZ = m_D3DConnectionOP->myGeometryOP->getRotation().m_Rz;
-
-		//cout << "rotX : " << rotX << "\t";
-		//cout << "rotY : " << rotY << "\t";
-		//cout << "rotZ : " << rotZ << endl;
-
-		float tX = m_D3DConnectionOP->myGeometryOP->getTranslation().m_Tx;
-		float tY = m_D3DConnectionOP->myGeometryOP->getTranslation().m_Ty;
-		float tZ = m_D3DConnectionOP->myGeometryOP->getTranslation().m_Tz;
-		float sX = m_D3DConnectionOP->myGeometryOP->getScalar().m_Sx;
-		float sY = m_D3DConnectionOP->myGeometryOP->getScalar().m_Sy;
-		float sZ = m_D3DConnectionOP->myGeometryOP->getScalar().m_Sz;
-
-		//m_Graphics->Render(rotX, rotY, rotZ,
-		//	tX, tY, tZ,
-		//	sX, sY, sZ);
-		m_Graphics->Render(m_D3DConnectionOP);
-	}
-
-	//To do: This function should be in NodeWinD3DGeometry and other derived classes
-	virtual void getD3DConnectionOP(myD3DConnectionOP *op) override;
-
-private:
-	GraphicsClass		*m_Graphics;  //Q: Why need to add myTD1NodeDLL as reference in myMain????
-	myD3DConnectionOP	*m_D3DConnectionOP;
 };
