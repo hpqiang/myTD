@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "rootWindow.h"
 
 Node::Node()
 {
@@ -6,6 +7,8 @@ Node::Node()
 	m_Content = nullptr;
 	m_NodesIn = {};
 	m_NodesOut = {};
+	m_NodesInDeleteCandidates = {};
+	m_NodesOutDeleteCandidates = {};
 }
 
 Node::~Node()
@@ -23,6 +26,9 @@ Node::~Node()
 
 	m_NodesIn.clear();
 	m_NodesOut.clear();
+
+	m_NodesInDeleteCandidates.clear();
+	m_NodesOutDeleteCandidates.clear();
 
 }
 
@@ -46,12 +52,28 @@ void Node::setContent(Content *content)
 
 bool Node::addNodeIn(Node *node)
 {
+	list<Node *>::iterator it;
+	for (it = m_NodesIn.begin(); it != m_NodesIn.end(); it++)
+	{
+		if ((*it) == node)
+		{
+			return true;
+		}
+	}
 	m_NodesIn.push_back(node);
 	return true;
 }
 
 bool Node::addNodeOut(Node *node)
 {
+	list<Node *>::iterator it;
+	for (it = m_NodesOut.begin(); it != m_NodesOut.end(); it++)
+	{
+		if ((*it) == node)
+		{
+			return true;
+		}
+	}
 	m_NodesOut.push_back(node);
 	return true;
 }
@@ -65,26 +87,72 @@ uint Node::getNodesOutSize()
 	return m_NodesOut.size();
 }
 
-int Node::drawConnection(bool isBiDir, bool isErase)
+int Node::drawConnection(bool isBiDir, bool isErase, bool isSelected)
 {
 	list<Node *>::iterator it;
 
 	for (it = m_NodesIn.begin(); it != m_NodesIn.end(); it++)
 	{
-		drawLine((*it)->getNodeWin()->getNodeWinHandle(), m_NodeWin->getNodeWinHandle(), isErase);
+		drawLine((*it)->getNodeWin()->getNodeWinHandle(), m_NodeWin->getNodeWinHandle(), isErase, isSelected);
 	}
 	if (isBiDir)
 	{
 		for (it = m_NodesOut.begin(); it != m_NodesOut.end(); it++)
 		{
-			drawLine(m_NodeWin->getNodeWinHandle(), (*it)->getNodeWin()->getNodeWinHandle(), isErase);
-
+			drawLine(m_NodeWin->getNodeWinHandle(), (*it)->getNodeWin()->getNodeWinHandle(), isErase, isSelected);
 		}
 	}
 	return 1;
 }
 
-int Node::drawLine(HWND from, HWND to, bool isErase)
+bool Node::isHittingConnLine(long x, long y)
+{
+	list<Node *>::iterator it;
+	RECT startRECT;
+	RECT endRECT;
+
+	//Only consider one direction now
+	for (it = m_NodesIn.begin(); it != m_NodesIn.end(); it++)
+	{
+		POINT start;
+		POINT end;
+		HWND to = m_NodeWin->getNodeWinHandle();
+		////HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
+		HWND from = (*it)->getNodeWin()->getNodeWinHandle();
+
+		RootWindow::getWindowMiddle(from, &start.x, &start.y, true);
+		RootWindow::getWindowMiddle(to, &end.x, &end.y, false);
+
+		if (RootWindow::isHittingConnLine(x, y, start.x, start.y,
+				end.x, end.y) == true)
+		{
+			//cout << "Hitting..." << endl;
+			drawLine(from, to, false, true);
+
+			list<Node *>::iterator dit;
+			for (dit = (*it)->m_NodesOutDeleteCandidates.begin();
+				dit != (*it)->m_NodesOutDeleteCandidates.end(); dit++)
+			{
+				if ((*dit) == (*it))
+					return true;
+			}
+			(*it)->m_NodesOutDeleteCandidates.push_back(this);
+
+			for (dit = m_NodesInDeleteCandidates.begin();
+				dit != m_NodesInDeleteCandidates.end(); dit++)
+			{
+				if ((*dit) == (*it))
+					return true;
+			}
+			m_NodesInDeleteCandidates.push_back(*it);
+
+			return true;
+		}
+	}
+	return false;
+}
+
+int Node::drawLine(HWND from, HWND to, bool isErase, bool isSelected)
 {
 	RECT startRECT;
 	RECT endRECT;
@@ -106,27 +174,24 @@ int Node::drawLine(HWND from, HWND to, bool isErase)
 	//if (to != nullptr)
 	{
 		HWND parentHwnd = GetParent(to);
-		RECT parentClientRect;
-		GetClientRect(parentHwnd, &parentClientRect);
-
-		//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
-		GetWindowRect(from, &startRECT);
-		MapWindowPoints(HWND_DESKTOP, GetParent(from), (LPPOINT)&startRECT, 2);
-		GetWindowRect(to, &endRECT);
-		MapWindowPoints(HWND_DESKTOP, GetParent(to), (LPPOINT)&endRECT, 2);
 
 		POINT start;
 		POINT end;
-		start.x = startRECT.right;
-		start.y = startRECT.top + (startRECT.bottom - startRECT.top) / 2;
-		end.x = endRECT.left;
-		end.y = endRECT.bottom - (endRECT.bottom - endRECT.top) / 2;
+		RootWindow::getWindowMiddle(from, &start.x, &start.y, true);
+		RootWindow::getWindowMiddle(to, &end.x, &end.y, false);
 
 		////HPQ: refer to http://winapi.freetechsecrets.com/win32/WIN32Drawing_Lines_with_the_Mouse.htm
 		hdc = GetDC(parentHwnd);
 		if (isErase)
 		{
 			SetROP2(hdc, R2_NOTXORPEN);
+			MoveToEx(hdc, start.x, start.y, NULL);
+			LineTo(hdc, end.x, end.y);
+		}
+		else if (isSelected)
+		{
+			SelectObject(hdc, GetStockObject(DC_PEN));
+			SetDCPenColor(hdc, RGB(255, 0, 0));  //red color To do: only black color works now
 			MoveToEx(hdc, start.x, start.y, NULL);
 			LineTo(hdc, end.x, end.y);
 		}
@@ -139,4 +204,68 @@ int Node::drawLine(HWND from, HWND to, bool isErase)
 		}
 	}
 	return 1;
+}
+
+bool Node::removeNodeInOut()
+{
+	list<Node *>::iterator it;
+	for (it = m_NodesIn.begin(); it != m_NodesIn.end();)
+	{
+		it = m_NodesIn.erase(it);
+	}
+	for (it = m_NodesOut.begin(); it != m_NodesOut.end();)
+	{
+		it = m_NodesOut.erase(it);
+	}
+
+	for (it = m_NodesInDeleteCandidates.begin(); it != m_NodesInDeleteCandidates.end();)
+	{
+		it = m_NodesInDeleteCandidates.erase(it);
+	}
+	for (it = m_NodesOutDeleteCandidates.begin(); it != m_NodesOutDeleteCandidates.end();)
+	{
+		it = m_NodesOutDeleteCandidates.erase(it);
+	}
+
+	return true;
+}
+
+bool Node::deleteDeleteCandidateNodes()
+{
+	list<Node *>::iterator it;
+	for (it = m_NodesInDeleteCandidates.begin(); 
+		it != m_NodesInDeleteCandidates.end();)
+	{
+		list<Node *>::iterator nit;
+		for (nit = m_NodesIn.begin(); nit != m_NodesIn.end();)
+		{
+			if ( *nit == *it)
+			{
+				nit = m_NodesIn.erase(nit);
+			}
+			else
+			{
+				nit++;
+			}
+		}
+		it = m_NodesInDeleteCandidates.erase(it);
+	}
+	for (it = m_NodesOutDeleteCandidates.begin(); 
+		it != m_NodesOutDeleteCandidates.end();)
+	{
+		list<Node *>::iterator nit;
+		for (nit = m_NodesOut.begin(); nit != m_NodesOut.end();)
+		{
+			if ( *nit == *it)
+			{
+				nit = m_NodesOut.erase(nit);
+			}
+			else
+			{
+				nit++;
+			}
+		}
+		it = m_NodesOutDeleteCandidates.erase(it);
+	}
+	return true;
 }

@@ -40,6 +40,7 @@ void NodeManager::removeNode(HWND hwnd)
 		if (node->getNodeWinHandle() == hwnd)
 		{
 			//To do: Delete inner pointers
+			(*it)->removeNodeInOut();
 			it = m_Nodes.erase(it);
 		}
 		else
@@ -54,16 +55,43 @@ uint NodeManager::getNodesSize()
 	return m_Nodes.size();
 }
 
-int NodeManager::drawConnections()
+bool NodeManager::isHittingConnLine(long x, long y)
+{
+	list<Node *>::iterator it;
+	
+	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+	{
+		if ((*it)->isHittingConnLine(x,y) == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int NodeManager::drawConnections(bool isSelected)
 {
 	list<Node *>::iterator it;
 
 	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
 	{
-		(*it)->drawConnection(false, false);
+		(*it)->drawConnection(false, false, isSelected);
 	}
 
 	return 1;
+}
+
+bool NodeManager::deleteDeleteCandidateNodes()
+{
+	list<Node *>::iterator it;
+
+	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+	{
+		(*it)->deleteDeleteCandidateNodes();
+	}
+
+	return true;
 }
 
 void NodeManager::Render()

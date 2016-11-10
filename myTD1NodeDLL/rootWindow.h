@@ -92,8 +92,10 @@ public:
 		return m_hwnd;
 	}
 
-	bool createInputObject();
-	bool createGraphicsObject();
+	static bool isHittingConnLine(long x, long y, long startX, long startY,
+		long endX, long endY);
+
+	static bool getWindowMiddle(HWND hwnd, long *x, long *y, bool isRight);
 
 protected:
 	int Initialize();

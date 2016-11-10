@@ -38,9 +38,9 @@ void createNodePopUpMenu(HWND hwnd, LPARAM lParam)
 LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	static HWND prevH = nullptr; 
-	static TDManager::myEvent prevEvent, curEvent;
+	static myEvent prevEvent, curEvent;
 	TDManager* td_Manager = nullptr;
-	TDManager::myEvent e;
+	myEvent e;
 
 	switch (umsg)
 	{
@@ -52,11 +52,8 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		NodeManager* nM = td_Manager->getNodeManager();
 
 		nM->removeNode(hwnd);
-		td_Manager->removeFromTo(hwnd);
-		// To do: destroy property window if this node win is an OP win
-
 		DestroyWindow(hwnd);
-		td_Manager->DrawConnections();
+		nM->drawConnections(false);
 
 		return 0;
 	}
@@ -66,7 +63,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		NodeManager* nM = td_Manager->getNodeManager();
 		Node *curNode = nM->findNode(hwnd);
 
-		curNode->drawConnection(true, true);
+		curNode->drawConnection(true, true, false);
 
 		return 0;
 	}
@@ -75,11 +72,10 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 	{
 		td_Manager = TDSingleton<TDManager>::getInstance();
 		NodeManager* nM = td_Manager->getNodeManager();
-
 		Node *curNode = nM->findNode(hwnd);
 
 		if (curNode != nullptr)
-			curNode->drawConnection(true, false);
+			curNode->drawConnection(true, false, false);
 
 		break;
 	}
@@ -91,7 +87,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		Node *curNode = nM->findNode(hwnd);
 
 		if (curNode != nullptr)
-			curNode->drawConnection(true, false);
+			curNode->drawConnection(true, false, false);
 
 		break;
 	}
@@ -111,7 +107,6 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 
 		td_Manager = TDSingleton<TDManager>::getInstance();
 		NodeManager* nM = td_Manager->getNodeManager();
-
 		Node *prevNode = nM->findNode(prevH);
 		Node *curNode = nM->findNode(hwnd);
 
@@ -119,7 +114,7 @@ LRESULT CALLBACK NodeWin::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lp
 		prevNode->addNodeOut(curNode);
 		curNode->addNodeIn(prevNode);
 
-		curNode->drawConnection(true, false);
+		curNode->drawConnection(true, false, false);
 
 		break;
 	}

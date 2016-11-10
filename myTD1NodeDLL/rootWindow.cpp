@@ -66,7 +66,7 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 	static bool bPrevLine = false;
 	TDManager* td_Manager = nullptr;
 	NodeManager* nM = nullptr;
-	TDManager::myEvent e;
+	myEvent e;
 
 	switch (umsg)
 	{
@@ -102,8 +102,6 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 				{
 					if (popUpMenuItem[j].id == LOWORD(wparam))
 					{
-						//cout << "This: " << LOWORD(wparam) << " is clicked..." << endl;
-						//cout << "POPUP: **********with command: " << popUpMenuItem[j].command.c_str() << endl;
 						e.event = popUpMenuItem[j].id;//To do: Should translate msgs like this?
 						e.hwnd = hwnd;
 						e.command = popUpMenuItem[j].command;
@@ -135,24 +133,12 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 		case WM_LBUTTONDOWN:
 		{
 			td_Manager = TDSingleton<TDManager>::getInstance();
+			NodeManager* nM = td_Manager->getNodeManager();
 
-			HWND From;
-			HWND To;
-			int num = 0;
+			if (nM->isHittingConnLine(LOWORD(lparam), HIWORD(lparam)) == true)
+				;
 
-			if ( td_Manager->isHittingConnLine(LOWORD(lparam), HIWORD(lparam), &num ) == true)
-			{
-				//system("cls");
-				//cout << "Hitting the line!!!! with num = " << num << endl;
-				td_Manager->DrawConnections();
-			}
-			else
-			{
-				//cout << "Not hitting....with num= " << num << endl;
-			}
-
-			return 0;
-			//break;
+			break;
 		}
 
 		case WM_KEYDOWN:
@@ -161,11 +147,11 @@ LRESULT CALLBACK RootWindow::WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM
 			{
 			case VK_DELETE:
 			{
-				//cout << "Delete key hitted" << endl;
-
 				td_Manager = TDSingleton<TDManager>::getInstance();
-				td_Manager->deleteSelectedLines();
-				td_Manager->DrawConnections();
+				NodeManager* nM = td_Manager->getNodeManager();
+
+				nM->deleteDeleteCandidateNodes();
+				nM->drawConnections(false);
 
 				break;
 			}
@@ -248,6 +234,49 @@ void RootWindow::DeInitialize()
 	m_hinst = NULL;
 
 	return;
+}
+
+bool RootWindow::isHittingConnLine(long x, long y, long startX, long startY,
+	long endX, long endY)
+{
+	if (x < min(startX, endX) || x > max(startX, endX)
+		|| y < min(startY, endY) || y > max(startY, endY))
+	{
+		return false;
+	}
+	
+	float k1 = (float)(y - startY) / (float)(x - startX);
+	float k2 = (float)(endY - startY) / (float)(endX - startX);
+	if (((k1 - k2) < 0.1f) && ((k1 - k2) > -0.1f))
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+bool RootWindow::getWindowMiddle(HWND hwnd, long *x, long *y, bool isRight)
+{
+	HWND parentHwnd = GetParent(hwnd);
+	RECT parentClientRect, winRect;
+	GetClientRect(parentHwnd, &parentClientRect);
+
+	//HPQ: refer to http://stackoverflow.com/questions/18034975/how-do-i-find-position-of-a-win32-control-window-relative-to-its-parent-window
+	GetWindowRect(hwnd, &winRect);
+	MapWindowPoints(HWND_DESKTOP, GetParent(hwnd), (LPPOINT)&winRect, 2);
+
+	if (isRight)
+	{
+		*x = winRect.right;
+		*y = winRect.top + (winRect.bottom - winRect.top) / 2;
+	}
+	else
+	{
+		*x = winRect.left;
+		*y = winRect.bottom - (winRect.bottom - winRect.top) / 2;
+	}
+
+	return true;
 }
 
 void RootWindow::displayWindow()

@@ -23,15 +23,22 @@ public:
 	uint getNodesInSize();
 	uint getNodesOutSize();
 
-	int drawConnection(bool isBiDir, bool isErase);
-	int drawLine(HWND from, HWND to, bool isErase);
+	int drawConnection(bool isBiDir, bool isErase, bool isSelected);
+	int drawLine(HWND from, HWND to, bool isErase, bool isSelected);
+	bool isHittingConnLine(long x, long y);
+
+	bool removeNodeInOut();
+	bool deleteDeleteCandidateNodes();
 
 private:
-	NodeWin *m_NodeWin;
-	Content *m_Content;
+	NodeWin			*m_NodeWin;
+	Content			*m_Content;
 
-	list<Node *> m_NodeComposite;  //should support composite pattern?
+	list<Node *>	m_NodeComposite;  //should support composite pattern?
 
 	list<Node *>	m_NodesIn;
 	list<Node *>	m_NodesOut;
+
+	list<Node *>	m_NodesInDeleteCandidates;
+	list<Node *>	m_NodesOutDeleteCandidates;
 };
