@@ -192,12 +192,26 @@ bool testInputClass(HINSTANCE hinst, HWND hwnd)
 }
 
 
+//template<typename... Args>
+//void add(Args... args)
+//{
+//	auto sum = 0;
+//	for (auto& arg : args)
+//	{
+//		sum += arg;
+//	}
+//	cout << "sum = " << sum << endl;
+//}
+
 int main()
 {
 	//test();
 	////testFactory();
 
 	//std::thread t = std::thread(createNode, 3);
+
+	//add<int>(1, 2, 3);
+
 	TDManager* td_Manager = TDSingleton<TDManager>::getInstance();
 
 	td_Manager->createRootWindow();

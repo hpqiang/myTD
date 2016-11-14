@@ -8,7 +8,10 @@
 #include "PropertyWin.h"
 
 #include "Content.h"
+#include "D3DBase.h"
 #include "ContentD3D.h"
+#include "ContentD3DDefaultScene.h"
+#include "ContentD3DOPGeometry.h"
 
 //Q: Why putting this to .h will cause issue??
 myCommand_Callback<int, string, myEvent>
@@ -86,9 +89,10 @@ int TDManager::loadContent(HWND hwnd, const string& title)
 	}
 	
 	//step2: set content
-	Content *content = new T();
-	content->createInputObject();
-	content->createGraphicsObject(hwnd);
+//	Content *content = new T();
+	Content *content = new ContentD3D(new T(), hwnd);
+//	content->createInputObject();
+//	content->createGraphicsObject(hwnd);
 
 	n->setContent(content);
 
@@ -107,7 +111,8 @@ int loadD3DScene(string s, myEvent e)
 {
 	TDManager* self = TDSingleton<TDManager>::getInstance();
 
-	self->loadContent<ContentD3D>(e.hwnd, "Default D3D Scene");
+	self->loadContent<ContentD3DDefaultScene>(e.hwnd, "Default D3D Scene");
+	//self->loadContent<ContentD3D>(e.hwnd, "Default D3D Scene");
 
 	return 1;
 }
@@ -118,10 +123,16 @@ int loadD3DOPGeometry(string s, myEvent e)
 	////step1: load the OP scene
 	TDManager* self = TDSingleton<TDManager>::getInstance();
 
-	//self->loadContent<ContentD3DGeometry>(e.hwnd, "Default D3D Geometry");
+	self->loadContent<ContentD3DOPGeometry>(e.hwnd, "Default D3D Geometry");
+	//self->loadContent<ContentD3D>(e.hwnd, "Default D3D Geometry");
 	//step2: create property window
 	
 	return 1;
+}
+
+void TDManager::Update()
+{
+	m_NodeManager->Update();
 }
 
 void TDManager::Render()

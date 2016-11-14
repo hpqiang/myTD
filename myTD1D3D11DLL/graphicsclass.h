@@ -5,6 +5,8 @@
 #include "modelclass.h"
 #include "textureshaderclass.h"
 
+//#include "Content.h"
+
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = false;// true;
 const float SCREEN_DEPTH = 1000.0f;
@@ -122,8 +124,7 @@ class __declspec(dllexport) GraphicsClass
 {
 public:
 	GraphicsClass();
-	GraphicsClass(const GraphicsClass&);
-	~GraphicsClass();
+	/*virtual*/ ~GraphicsClass();
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();

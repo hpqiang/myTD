@@ -1,8 +1,7 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: textureshaderclass.cpp
-////////////////////////////////////////////////////////////////////////////////
-#include "textureshaderclass.h"
+#include <iostream>
+using namespace std;
 
+#include "textureshaderclass.h"
 
 TextureShaderClass::TextureShaderClass()
 {
@@ -13,21 +12,13 @@ TextureShaderClass::TextureShaderClass()
 	m_sampleState = 0;
 }
 
-
-TextureShaderClass::TextureShaderClass(const TextureShaderClass& other)
-{
-}
-
-
 TextureShaderClass::~TextureShaderClass()
 {
 }
 
-
 bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
 	bool result;
-
 
 	// Initialize the vertex and pixel shaders.
 	result = InitializeShader(device, hwnd, L"C:/Users/lcuser/Documents/Visual Studio 2015/Projects/myTD/myTD1D3D11DLL/Data/texture.vs",
@@ -40,7 +31,6 @@ bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 	return true;
 }
 
-
 void TextureShaderClass::Shutdown()
 {
 	// Shutdown the vertex and pixel shaders as well as the related objects.
@@ -49,12 +39,10 @@ void TextureShaderClass::Shutdown()
 	return;
 }
 
-
 bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 								D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	bool result;
-
 
 	// Set the shader parameters that it will use for rendering.
 	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture);
@@ -69,11 +57,7 @@ bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCou
 	return true;
 }
 
-#include <iostream>
-using namespace std;
-
-
-bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCHAR**/LPCWSTR vsFilename, /*WCHAR**/LPCWSTR psFilename)
+bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, LPCWSTR vsFilename, LPCWSTR psFilename)
 {
 	HRESULT result;
 	ID3D10Blob* errorMessage;
@@ -83,7 +67,6 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCH
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
     D3D11_SAMPLER_DESC samplerDesc;
-
 
 	// Initialize the pointers this function will use to null.
 	errorMessage = 0;
@@ -100,13 +83,13 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCH
 		// If the shader failed to compile it should have writen something to the error message.
 		if(errorMessage)
 		{
-			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+			//OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
 		}
 		// If there was nothing in the error message then it simply could not find the shader file itself.
 		else
 		{
 			//MessageBox(hwnd, vsFilename, /*L*/"Missing Shader File", MB_OK);
-			MessageBoxW(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+			//MessageBoxW(hwnd, vsFilename, L"Missing Shader File", MB_OK);
 		}
 
 		return false;
@@ -122,13 +105,13 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCH
 		// If the shader failed to compile it should have writen something to the error message.
 		if(errorMessage)
 		{
-			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+			//OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
 		}
 		// If there was  nothing in the error message then it simply could not find the file itself.
 		else
 		{
 			//MessageBox(hwnd, psFilename, /*L*/"Missing Shader File", MB_OK);
-			MessageBoxW(hwnd, psFilename, L"Missing Shader File", MB_OK);
+			//MessageBoxW(hwnd, psFilename, L"Missing Shader File", MB_OK);
 		}
 
 		return false;
@@ -188,12 +171,12 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCH
 	pixelShaderBuffer = 0;
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
-	/**/ZeroMemory(&matrixBufferDesc,sizeof(matrixBufferDesc));
+	ZeroMemory(&matrixBufferDesc,sizeof(matrixBufferDesc));
 	matrixBufferDesc.Usage = D3D11_USAGE_DEFAULT;//D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
     matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = 0;// D3D11_CPU_ACCESS_WRITE;
- //   matrixBufferDesc.MiscFlags = 0;
+	//matrixBufferDesc.MiscFlags = 0;
 	//matrixBufferDesc.StructureByteStride = 0;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
@@ -204,7 +187,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCH
 	}
 
 	// Create a texture sampler state description.
-	/**/ZeroMemory(&samplerDesc,sizeof(samplerDesc));
+	ZeroMemory(&samplerDesc,sizeof(samplerDesc));
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
     samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -212,7 +195,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, /*WCH
     //samplerDesc.MipLODBias = 0.0f;
     //samplerDesc.MaxAnisotropy = 1;
     samplerDesc.ComparisonFunc = /*D3D11_COMPARISON_NEVER;*/D3D11_COMPARISON_ALWAYS;
- //   samplerDesc.BorderColor[0] = 1;
+	//samplerDesc.BorderColor[0] = 1;
 	//samplerDesc.BorderColor[1] = 0;
 	//samplerDesc.BorderColor[2] = 0;
 	//samplerDesc.BorderColor[3] = 0;
@@ -315,7 +298,6 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 
-
 	// Transpose the matrices to prepare them for the shader.
 	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
 	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
@@ -355,7 +337,6 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
 	return true;
 }
-
 
 void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {

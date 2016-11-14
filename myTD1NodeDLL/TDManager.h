@@ -39,6 +39,7 @@ public:
 
 	NodeManager* getNodeManager();
 
+	void Update();
 	void Render();
 
 	void sendEvent(myEvent event);
@@ -48,8 +49,8 @@ public:
 	//Q: To do: registration pattern? refer to : http://stackoverflow.com/questions/1096700/instantiate-class-from-name
 	void processEachEvent(const myEvent& e);
 
-
 	int createNewNodeWin(HWND hwnd, const string& title);
+
 	template<class T>
 	int loadContent(HWND hwnd, const string& title);
 

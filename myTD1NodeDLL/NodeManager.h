@@ -18,8 +18,7 @@ public:
 
 	bool deleteDeleteCandidateNodes();
 
-	//To do: Update();
-
+	void Update();
 	void Render();
 
 private:

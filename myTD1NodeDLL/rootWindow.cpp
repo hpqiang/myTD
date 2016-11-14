@@ -3,6 +3,8 @@
 #include "TDManager.h"
 #include "rootWindow.h"
 
+#include "inputclass.h"
+
 //HPQ: refer to http://zetcode.com/gui/winapi/menus/
 void AddMenu(HWND hwnd)
 {
@@ -167,6 +169,28 @@ RootWindow::RootWindow()
 	, m_Style(0), m_hinst(nullptr), m_hwnd(nullptr)
 {
 	Initialize();
+
+//	m_Input = new InputClass;
+//	if (!m_Input)
+//	{
+//		return; // false;
+//	}
+//
+//	//// Initialize the input object.
+//	RECT rect;
+//	//GetWindowRect(hwnd, &rect);
+//	//GetClientRect(hwnd, &rect);
+//	//int w = rect.right - rect.left;
+//	//int h = rect.bottom - rect.top;
+//	int w = GetSystemMetrics(SM_CXSCREEN);
+//	int h = GetSystemMetrics(SM_CYSCREEN);
+////	HWND parentHwnd = GetParent(hwnd);
+//	//GetWindowRect(parentHwnd, &rect);
+//	//int w = rect.right - rect.left;
+//	//int h = rect.bottom - rect.top;
+//	m_Input->Initialize(m_hinst, m_hwnd, w, h);
+//
+//
 }
 
 RootWindow::~RootWindow()
@@ -318,6 +342,11 @@ void RootWindow::run()
 		else
 		{
 			// Otherwise do the frame processing.
+			// To do: Why this Frame will have m_mouse always return nullptr????
+			// Refer rastertut's rendertotexture, why they are successful???
+			//m_Input->Frame();
+
+			td_Manager->Update();
 			td_Manager->Render();  //To do: Render should have a return value
 //			result = Frame();
 			//if (!result)

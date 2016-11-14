@@ -1,26 +1,9 @@
 #pragma once
-////////////////////////////////////////////////////////////////////////////////
-// Filename: modelclass.h
-////////////////////////////////////////////////////////////////////////////////
-#ifndef _MODELCLASS_H_
-#define _MODELCLASS_H_
-
-
-//////////////
-// INCLUDES //
-//////////////
 #include <d3d11.h>
 #include <d3dx10math.h>
 
-///////////////////////
-// MY CLASS INCLUDES //
-///////////////////////
 #include "textureclass.h"
 
-
-////////////////////////////////////////////////////////////////////////////////
-// Class name: ModelClass
-////////////////////////////////////////////////////////////////////////////////
 class ModelClass
 {
 private:
@@ -32,10 +15,9 @@ private:
 
 public:
 	ModelClass();
-	ModelClass(const ModelClass&);
 	~ModelClass();
 
-	bool Initialize(ID3D11Device*, LPCWSTR);// WCHAR*);
+	bool Initialize(ID3D11Device*, LPCWSTR);
 	
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
@@ -43,13 +25,16 @@ public:
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();
 
+protected:
+	bool getVertices(VertexType **v, int *nV);
+	bool getIndices(unsigned long **indices, int *nI);
 
 private:
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 
-	bool LoadTexture(ID3D11Device*, LPCWSTR); // WCHAR*);
+	bool LoadTexture(ID3D11Device*, LPCWSTR);
 	void ReleaseTexture();
 
 private:
@@ -57,5 +42,3 @@ private:
 	int m_vertexCount, m_indexCount;
 	TextureClass* m_Texture;
 };
-
-#endif

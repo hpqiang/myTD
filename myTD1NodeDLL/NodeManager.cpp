@@ -94,6 +94,20 @@ bool NodeManager::deleteDeleteCandidateNodes()
 	return true;
 }
 
+void NodeManager::Update()
+{
+	if (m_Nodes.empty())
+		return;
+	list<Node *>::iterator it;
+
+	for (it = m_Nodes.begin(); it != m_Nodes.end(); it++)
+	{
+		Content *content = (*it)->getContent();
+		if (content != nullptr)  //Temp
+			content->/*Render*/contentOP1(/*0, */(*it)->getNodeWin()->getNodeWinHandle()); //contentOP2(); //Render(0);
+	}
+}
+
 void NodeManager::Render()
 {
 	if (m_Nodes.empty())
@@ -104,6 +118,6 @@ void NodeManager::Render()
 	{
 		Content *content = (*it)->getContent();
 		if (content != nullptr)  //Temp
-			content->Render(0);
+			content->/*Render*/contentOP2(/*0, */(*it)->getNodeWin()->getNodeWinHandle()); //contentOP2(); //Render(0);
 	}
 }

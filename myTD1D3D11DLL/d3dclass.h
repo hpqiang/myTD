@@ -1,13 +1,5 @@
 #pragma once
-////////////////////////////////////////////////////////////////////////////////
-// Filename: d3dclass.h
-////////////////////////////////////////////////////////////////////////////////
-#ifndef _D3DCLASS_H_
-#define _D3DCLASS_H_
 
-/////////////
-// LINKING //
-/////////////
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dx11.lib")
@@ -17,26 +9,18 @@
 #pragma comment(lib, "DXGUID.lib")
 /**********/
 
-//////////////
-// INCLUDES //
-//////////////
 #include <dxgi.h>
 #include <d3dcommon.h>
 #include <d3d11.h>
 #include <d3dx10math.h>
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: D3DClass
-////////////////////////////////////////////////////////////////////////////////
 class D3DClass
 {
 public:
 	D3DClass();
-	D3DClass(const D3DClass&);
 	~D3DClass();
 
-	//bool Initialize(int, int, bool, HWND, bool, float, float);
-	bool createD3DEnv(/*int, int,*/ bool, HWND, bool, float, float);
+	bool createD3DEnv(bool, HWND, bool, float, float);
 	void Shutdown();
 
 	void BeginScene(float, float, float, float);
@@ -44,8 +28,6 @@ public:
 
 	ID3D11Device* GetDevice();
 	ID3D11DeviceContext* GetDeviceContext();
-	//static ID3D11Device* GetDevice();
-	//static ID3D11DeviceContext* GetDeviceContext();
 
 	void GetProjectionMatrix(D3DXMATRIX&);
 	void GetWorldMatrix(D3DXMATRIX&);
@@ -69,8 +51,6 @@ private:
 	int m_videoCardMemory;
 	char m_videoCardDescription[128];
 	IDXGISwapChain* m_swapChain;
-	//static ID3D11Device* m_device;
-	//static ID3D11DeviceContext* m_deviceContext;
 	ID3D11Device* m_device;
 	ID3D11DeviceContext* m_deviceContext;
 	ID3D11RenderTargetView* m_renderTargetView;
@@ -82,5 +62,3 @@ private:
 	D3DXMATRIX m_worldMatrix;
 	D3DXMATRIX m_orthoMatrix;
 };
-
-#endif

@@ -149,6 +149,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inputclass.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="NodeManager.h" />
     <ClInclude Include="CommonDefs.h" />
@@ -160,6 +161,7 @@
     <ClInclude Include="TDSingleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="NodeManager.cpp" />
     <ClCompile Include="NodeWin.cpp" />
@@ -171,6 +173,9 @@
   <ItemGroup>
     <ProjectReference Include="..\myTD1ContentDLL\myTD1ContentDLL.vcxproj">
       <Project>{beb8968d-6ac1-4a5d-9886-7c5209fdd03e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\myTD1D3D11DLL\myTD1D3D11DLL.vcxproj">
+      <Project>{8be83c28-ebef-48c9-98e5-ef008275793e}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

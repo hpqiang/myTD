@@ -1,11 +1,7 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: graphicsclass.cpp
-////////////////////////////////////////////////////////////////////////////////
-//#include "nodeWindow.h"
-
 #include "graphicsclass.h"
 
 #include <iostream>
+#include <string>
 using namespace std;
 
 GraphicsClass::GraphicsClass()
@@ -16,30 +12,13 @@ GraphicsClass::GraphicsClass()
 	m_TextureShader = 0;
 }
 
-
-GraphicsClass::GraphicsClass(const GraphicsClass& other)
-{
-}
-
+//GraphicsClass::GraphicsClass(const GraphicsClass& other)
+//{
+//}
 
 GraphicsClass::~GraphicsClass()
 {
 }
-
-static void printMatrix(D3DXMATRIX m) {
-	cout << endl;
-	cout << m._11 << " " << m._12 << " " << m._13 << " " << m._14;
-	cout << endl;
-	cout << m._21 << " " << m._22 << " " << m._23 << " " << m._24;
-	cout << endl;
-	cout << m._31 << " " << m._32 << " " << m._33 << " " << m._34;
-	cout << endl;
-	cout << m._41 << " " << m._42 << " " << m._43 << " " << m._44;
-	cout << endl;
-
-}
-
-#include <string>
 
 bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
@@ -90,24 +69,9 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	result = m_TextureShader->Initialize(m_D3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, /*L*/"Could not initialize the texture shader object.", /*L*/"Error", MB_OK);
+		//MessageBox(hwnd, /*L*/"Could not initialize the texture shader object.", /*L*/"Error", MB_OK);
 		return false;
 	}
-
-	//D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix;
-
-	//// Get the view, projection, and world matrices from the camera and d3d objects.
-	//m_Camera->GetViewMatrix(viewMatrix);
-	//m_D3D->GetProjectionMatrix(projectionMatrix);
-	//m_D3D->GetWorldMatrix(worldMatrix);
-	//
-	//cout << "Initialize: " << endl;
-	//cout << "viewMatrix: " << endl;
-	//printMatrix(viewMatrix);
-	//cout << "projectionMatrix: " << endl;
-	//printMatrix(projectionMatrix);
-	//cout << "worldMatrix: " << endl;
-	//printMatrix(worldMatrix);
 
 	return true;
 }
@@ -148,7 +112,6 @@ void GraphicsClass::Shutdown()
 	return;
 }
 
-
 bool GraphicsClass::Frame(int mouseX, int mouseY)
 {
 	bool result;
@@ -166,7 +129,6 @@ bool GraphicsClass::Frame(int mouseX, int mouseY)
 	//return true;
 
 	// Render the graphics scene.
-	//	result = Render(nullptr);
 	result = Render(0);
 	if (!result)
 	{
@@ -251,8 +213,6 @@ bool GraphicsClass::Render(myD3DConnectionOP *op)
 
 	D3DXMatrixMultiply(&mRT, &mR, &mT);
 	D3DXMatrixMultiply(&worldMatrix, &mRT, &mS);
-
-
 
 	m_Model->Render(m_D3D->GetDeviceContext());
 

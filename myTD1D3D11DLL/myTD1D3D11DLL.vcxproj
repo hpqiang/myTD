@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXSDK_DIR)\Include;$(SolutionDir)\myTD1WindowDLL;$(IncludePath)</IncludePath>
-    <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(DXSDK_DIR)\Include;$(SolutionDir)\myTD1WindowDLL;$(SolutionDir)\myTD1ContentDLL;$(IncludePath)</IncludePath>
+    <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(SolutionDir)\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -148,6 +148,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="ContentD3DDefaultScene.h" />
+    <ClInclude Include="ContentD3DOPGeometry.h" />
+    <ClInclude Include="D3DBase.h" />
     <ClInclude Include="d3dclass.h" />
     <ClInclude Include="graphicsclass.h" />
     <ClInclude Include="inputclass.h" />
@@ -157,6 +160,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cameraclass.cpp" />
+    <ClCompile Include="ContentD3DDefaultScene.cpp" />
+    <ClCompile Include="ContentD3DOPGeometry.cpp" />
+    <ClCompile Include="D3DBase.cpp" />
     <ClCompile Include="d3dclass.cpp" />
     <ClCompile Include="graphicsclass.cpp" />
     <ClCompile Include="inputclass.cpp" />

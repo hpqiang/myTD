@@ -1,21 +1,10 @@
 #include "Content.h"
 
-bool Content::loadContent(IContent** content, const string& source)
+bool Content::contentOP1(HWND hwnd)
 {
 	return true;
 }
-
-
-bool Content::createInputObject()
+void Content::contentOP2(HWND hwnd)
 {
-	return true;
-}
-
-bool Content::createGraphicsObject(HWND hwnd)
-{
-	return true;
-}
-
-void Content::Render(int a)
-{
+	return;
 }

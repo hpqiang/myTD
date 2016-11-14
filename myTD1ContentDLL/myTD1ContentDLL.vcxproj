@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)myTD1NodeDLL;$(SolutionDir)myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\myTD1NodeDLL;$(SolutionDir)\myTD1D3D11DLL;$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(DXSDK_DIR)\Lib\x86;$(SolutionDir)\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

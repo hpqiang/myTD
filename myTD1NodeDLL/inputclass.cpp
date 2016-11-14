@@ -124,8 +124,6 @@ bool InputClass::Frame()
 {
 	bool result;
 
-	cout << "Framing..." << endl;
-
 	// Read the current state of the keyboard.
 	result = ReadKeyboard();
 	if (!result)

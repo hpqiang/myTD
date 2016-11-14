@@ -2,6 +2,8 @@
 
 #include <Windows.h>
 
+#include "inputclass.h"
+
 typedef struct Menu
 {
 	uint id;
@@ -107,4 +109,6 @@ private:
 	UINT    m_Style;
 	HINSTANCE m_hinst;
 	HWND	m_hwnd;
+
+	InputClass *m_Input;
 };

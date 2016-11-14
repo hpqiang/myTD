@@ -1,40 +1,27 @@
 #pragma once
 
-#include "CommonDefs.h"
-//#include "../myTD1NodeDLL/inputclass.h"
-//#include "../myTD1D3D11DLL/graphicsclass.h"
-
-//#include "NodeWin.h"
-
 #include <Windows.h>
 
-class IContent
+class __declspec(dllexport) IContent
 {
 public:
-	virtual bool loadContent(IContent** content, const string& source) = 0;
-	virtual bool createInputObject() = 0;
-	virtual bool createGraphicsObject(HWND hwnd) = 0;
-	virtual void Render(int a) = 0; //Q: Should be here or where?
+	//template<typename... Args>
+	//virtual bool contentFirstOperation(Args... args) = 0;
+	virtual bool contentOP1(HWND hwnd) = 0;
+	//template<typename... Args>
+	//virtual void contentSecondOperation(Args... args) = 0;
+	virtual void contentOP2(HWND hwnd) = 0;
 };
 
 class __declspec(dllexport) Content :public IContent
 {
 public:
 	Content() {}
-	//Content(const Content& content){}
-	/*virtual*/ ~Content() {}
+	virtual ~Content() {}
 
-	virtual bool loadContent(IContent** content, const string& source) override;
-
-	virtual bool createInputObject() override;
-
-	virtual bool createGraphicsObject(HWND hwnd) override;
-
-	virtual void Render(int a) override;
-
+	virtual bool contentOP1(HWND hwnd) override;
+	virtual void contentOP2(HWND hwnd) override;
 private:
-	//InputClass		*m_Input;
-	//GraphicsClass	*m_Graphics;
 };
 
 //class ContentText :public Content  //Note: Move to 'Text' menu
